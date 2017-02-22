@@ -126,14 +126,12 @@ func fetchRandomMedia(db *sql.DB, session *instagram.Session, users []*instagram
 
 	// select a random user
 	user := users[rand.Intn(len(users))]
-	log.Printf("randomly selected: %s\n", user.Name)
 
 	// get a list of media ids for the user
 	medias, err := session.GetUserMediaIDS(user)
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("found %d media ids\n", len(medias))
 
 	// find an unused media id
 	var mediaID string
@@ -152,14 +150,12 @@ func fetchRandomMedia(db *sql.DB, session *instagram.Session, users []*instagram
 	if mediaID == "" {
 		return nil, fmt.Errorf("no unused media found")
 	}
-	log.Printf("selected media id: %s\n", mediaID)
 
 	// get the url
 	media, err := session.GetUserImage(mediaID)
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("got url for media id: %s\n", media.URL)
 
 	// get the image
 	resp, err := http.Get(media.URL)
@@ -167,7 +163,6 @@ func fetchRandomMedia(db *sql.DB, session *instagram.Session, users []*instagram
 		return nil, err
 	}
 	defer resp.Body.Close()
-	log.Printf("fetched the image\n")
 
 	// decode the image
 	img, _, err := image.Decode(resp.Body)
