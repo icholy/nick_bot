@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"database/sql"
 	"flag"
 	"fmt"
@@ -40,7 +41,7 @@ func (m *Media) String() string {
 	return fmt.Sprintf("%s: %s", m.Username, m.URL)
 }
 
-func start(db *sql.DB) error {
+func start(db *sql.DB, caption string) error {
 
 	session, err := instagram.New(*username, *password)
 	if err != nil {
@@ -107,7 +108,7 @@ func start(db *sql.DB) error {
 	log.Printf("written to %s\n", outpath)
 
 	if *upload {
-		caption := fmt.Sprintf("photocred goes to: @%s", media.Username)
+		caption := fmt.Sprintf("%s\n\nphotocred goes to: @%s", caption, media.Username)
 		return session.UploadPhoto(outpath, caption)
 	}
 
@@ -116,6 +117,12 @@ func start(db *sql.DB) error {
 
 func main() {
 	flag.Parse()
+
+	captionIndex := 0
+	captions, err := readCaptions("captions.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	db, err := sql.Open("sqlite3", "media.db")
 	if err != nil {
@@ -128,8 +135,15 @@ func main() {
 	}
 
 	for {
+
+		caption := captions[captionIndex]
+		captionIndex++
+		if captionIndex >= len(captions) {
+			captionIndex = 0
+		}
+
 		log.Println("trying to post an image")
-		if err := start(db); err != nil {
+		if err := start(db, caption); err != nil {
 			log.Printf("error: %s\n", err)
 		}
 		time.Sleep(*interval)
@@ -241,4 +255,21 @@ func shuffle(slice []string) {
 		j := rand.Intn(i + 1)
 		slice[i], slice[j] = slice[j], slice[i]
 	}
+}
+
+func readCaptions(filename string) ([]string, error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	var captions []string
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		captions = append(captions, scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	return captions, err
 }
