@@ -14,9 +14,10 @@ import (
 var haarCascade = flag.String("haar", "haarcascade_frontalface_alt.xml", "The location of the Haar Cascade XML configuration to be provided to OpenCV.")
 
 type FaceReplacer struct {
-	base  image.Image
-	rects []image.Rectangle
-	faces FaceList
+	base   image.Image
+	rects  []image.Rectangle
+	faces  FaceList
+	finder *facefinder.Finder
 }
 
 func New(base image.Image, facesPath string) (*FaceReplacer, error) {
@@ -34,10 +35,15 @@ func New(base image.Image, facesPath string) (*FaceReplacer, error) {
 	finder := facefinder.NewFinder(*haarCascade)
 
 	return &FaceReplacer{
-		rects: finder.Detect(base),
-		faces: faces,
-		base:  base,
+		rects:  finder.Detect(base),
+		faces:  faces,
+		base:   base,
+		finder: finder,
 	}, nil
+}
+
+func (fr *FaceReplacer) Close() {
+	fr.finder.Close()
 }
 
 func (fr *FaceReplacer) NumFaces() int {

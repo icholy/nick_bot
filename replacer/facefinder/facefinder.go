@@ -18,6 +18,10 @@ func NewFinder(xml string) *Finder {
 	}
 }
 
+func (f *Finder) Close() {
+	f.cascade.Release()
+}
+
 func (f *Finder) Detect(i image.Image) []image.Rectangle {
 	var output []image.Rectangle
 

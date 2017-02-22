@@ -80,6 +80,7 @@ func start(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
+	defer faceReplacer.Close()
 
 	facecount := faceReplacer.NumFaces()
 
