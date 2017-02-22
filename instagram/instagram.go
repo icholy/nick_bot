@@ -19,8 +19,7 @@ type Image struct {
 }
 
 type Session struct {
-	insta  *goinsta.Instagram
-	Images chan string
+	insta *goinsta.Instagram
 }
 
 func New(username, password string) (*Session, error) {
@@ -29,8 +28,7 @@ func New(username, password string) (*Session, error) {
 		return nil, err
 	}
 	return &Session{
-		insta:  insta,
-		Images: make(chan string),
+		insta: insta,
 	}, nil
 }
 
