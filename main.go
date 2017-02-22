@@ -119,11 +119,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	for _ = range time.Tick(*interval) {
+	for {
 		log.Println("trying to post an image")
 		if err := start(db); err != nil {
 			log.Printf("error: %s\n", err)
 		}
+		time.Sleep(*interval)
 	}
 
 }
