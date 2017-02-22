@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 
 	"github.com/disintegration/imaging"
-	"github.com/icholy/nickify/facefinder"
+	"github.com/icholy/nick_bot/replacer/facefinder"
 )
 
 var haarCascade = flag.String("haar", "haarcascade_frontalface_alt.xml", "The location of the Haar Cascade XML configuration to be provided to OpenCV.")
@@ -26,7 +26,7 @@ type FaceReplacer struct {
 func New(imagePath string, facesPath string) (*FaceReplacer, error) {
 
 	// read base image
-	base := LoadImage(imagePath)
+	base := loadImage(imagePath)
 
 	// read faces
 	var faces FaceList
