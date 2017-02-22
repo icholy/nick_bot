@@ -91,6 +91,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer session.Close()
 	// get a list of users
 	users, err := session.GetUsers()
 	if err != nil {
@@ -100,7 +101,6 @@ func main() {
 		log.Fatalf("no users found")
 	}
 	log.Printf("found %d users\n", len(users))
-	defer session.Close()
 	for {
 		err := try(session, users)
 		if err == nil {
