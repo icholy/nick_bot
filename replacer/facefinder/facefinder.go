@@ -25,7 +25,7 @@ func (f *Finder) Close() {
 func (f *Finder) Detect(i image.Image) []image.Rectangle {
 	var output []image.Rectangle
 
-	faces := f.cascade.DetectObjects(opencv.FromImage(i))
+	faces := f.cascade.DetectObjects(opencv.FromImage(i), 5)
 	for _, face := range faces {
 		output = append(output, image.Rectangle{
 			image.Point{face.X(), face.Y()},
