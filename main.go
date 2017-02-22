@@ -21,6 +21,33 @@ var (
 	password = flag.String("password", "", "instagram password")
 )
 
+func main() {
+	flag.Parse()
+
+	session, err := instagram.New(*username, *password)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer session.Close()
+
+	base, mediaID, err := fetchRandomImage(session)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	newImage, err := replaceFaces(base)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	outpath := filepath.Join("output", mediaID+"_nick.jpeg")
+	if err := writeImage(outpath, newImage); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("written to %s\n", outpath)
+}
+
 func writeImage(filename string, img image.Image) error {
 	f, err := os.Create(filename)
 	if err != nil {
@@ -30,7 +57,17 @@ func writeImage(filename string, img image.Image) error {
 	return jpeg.Encode(f, img, &jpeg.Options{jpeg.DefaultQuality})
 }
 
-func try(session *instagram.Session, users []*instagram.User) error {
+func fetchRandomImage(session *instagram.Session) (image.Image, string, error) {
+
+	// get a list of users
+	users, err := session.GetUsers()
+	if err != nil {
+		return nil, "", err
+	}
+	if len(users) == 0 {
+		return nil, "", fmt.Errorf("no users found")
+	}
+	log.Printf("found %d users\n", len(users))
 
 	// select a random user
 	user := users[rand.Intn(len(users))]
@@ -39,10 +76,10 @@ func try(session *instagram.Session, users []*instagram.User) error {
 	// get a list of media ids for the user
 	medias, err := session.GetUserMediaIDS(user)
 	if err != nil {
-		return err
+		return nil, "", err
 	}
 	if len(medias) == 0 {
-		return fmt.Errorf("no medias found for user")
+		return nil, "", fmt.Errorf("no medias found for user")
 	}
 	log.Printf("found %d media ids\n", len(medias))
 
@@ -53,77 +90,35 @@ func try(session *instagram.Session, users []*instagram.User) error {
 	// get the url
 	media, err := session.GetUserImage(mediaID)
 	if err != nil {
-		return err
+		return nil, "", err
 	}
 	log.Printf("got url for media id: %s\n", media.URL)
 
 	// get the image
 	resp, err := http.Get(media.URL)
 	if err != nil {
-		return err
+		return nil, "", err
 	}
 	defer resp.Body.Close()
 	log.Printf("fetched the image\n")
 
 	// decode the image
-	baseImage, _, err := image.Decode(resp.Body)
+	img, _, err := image.Decode(resp.Body)
 	if err != nil {
-		return err
+		return nil, "", err
 	}
 
-	// writing image
-	original := filepath.Join("output", mediaID+"_original.jpeg")
-	if err := writeImage(original, baseImage); err != nil {
-		return err
-	}
-	fmt.Printf("saved original to %s\n", original)
-
-	faceReplacer, err := replacer.New(baseImage, "faces")
-	if err != nil {
-		return err
-	}
-
-	if faceReplacer.NumFaces() == 0 {
-		return fmt.Errorf("no faces found")
-	}
-	log.Printf("found %d face(s) in image\n", faceReplacer.NumFaces())
-
-	img, err := faceReplacer.AddFaces()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	outpath := filepath.Join("output", mediaID+"_nick.jpeg")
-	if err := writeImage(outpath, img); err != nil {
-		return err
-	}
-
-	log.Printf("written to %s\n", outpath)
-	return nil
+	return img, mediaID, nil
 }
 
-func main() {
-	flag.Parse()
-
-	// login
-	session, err := instagram.New(*username, *password)
+func replaceFaces(base image.Image) (image.Image, error) {
+	faceReplacer, err := replacer.New(base, "faces")
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	defer session.Close()
-
-	// get a list of users
-	users, err := session.GetUsers()
-	if err != nil {
-		log.Fatal(err)
+	if faceReplacer.NumFaces() == 0 {
+		return nil, fmt.Errorf("no faces found")
 	}
-	if len(users) == 0 {
-		log.Fatalf("no users found")
-	}
-	log.Printf("found %d users\n", len(users))
-
-	// keep trying
-	if err := try(session, users); err != nil {
-		log.Fatal(err)
-	}
+	log.Printf("found %d face(s) in image\n", faceReplacer.NumFaces())
+	return faceReplacer.AddFaces()
 }
