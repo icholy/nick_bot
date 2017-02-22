@@ -12,6 +12,7 @@ import (
 )
 
 var haarCascade = flag.String("haar", "haarcascade_frontalface_alt.xml", "The location of the Haar Cascade XML configuration to be provided to OpenCV.")
+var margin = flag.Float64("margin", 30.0, "The face rectangle margin")
 
 type FaceReplacer struct {
 	base   image.Image
@@ -56,7 +57,7 @@ func (fr *FaceReplacer) AddFaces() (*image.RGBA, error) {
 	canvas := canvasFromImage(fr.base)
 
 	for _, rect := range fr.rects {
-		rect := rectMargin(30.0, rect)
+		rect := rectMargin(*margin, rect)
 
 		newFace := fr.faces.Random()
 		if newFace == nil {
