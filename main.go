@@ -103,7 +103,9 @@ func start(db *sql.DB) error {
 	}
 
 	log.Printf("written to %s\n", outpath)
-	return nil
+
+	caption := fmt.Sprintf("photocred goes to: %s", media.Username)
+	return session.UploadPhoto(outpath, caption)
 }
 
 func main() {
