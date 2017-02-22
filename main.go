@@ -107,7 +107,7 @@ func start(db *sql.DB) error {
 	log.Printf("written to %s\n", outpath)
 
 	if *upload {
-		caption := fmt.Sprintf("photocred goes to: %s", media.Username)
+		caption := fmt.Sprintf("photocred goes to: @%s", media.Username)
 		return session.UploadPhoto(outpath, caption)
 	}
 
