@@ -104,7 +104,7 @@ func (s *Session) GetUsers() ([]*User, error) {
 	for _, u := range resp.Users {
 		users = append(users, &User{
 			ID:   u.StringID(),
-			Name: u.FullName,
+			Name: u.Username,
 		})
 	}
 	return users, nil
