@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -54,9 +55,33 @@ func main() {
 	}
 	defer session.Close()
 
-	media, err := fetchRandomMedia(db, session)
+	// get a list of users
+	users, err := session.GetUsers()
 	if err != nil {
 		log.Fatal(err)
+	}
+	if len(users) == 0 {
+		log.Fatalf("no users found")
+	}
+	log.Printf("found %d users\n", len(users))
+
+	var media *Media
+
+	for i := 0; true; i++ {
+
+		if i > 10 {
+			log.Fatalf("too many failed attempts")
+		}
+
+		log.Printf("fetch attempt %d\n", i+1)
+		media, err = fetchRandomMedia(db, session, users)
+		if err == nil {
+			break
+		}
+
+		log.Printf("error fetching media: %s\n", err)
+		log.Println("trying again in 5 seconds\n")
+		time.Sleep(time.Second * 5)
 	}
 
 	faceReplacer, err := replacer.New(media.Image, "faces")
@@ -97,17 +122,7 @@ func writeImage(filename string, img image.Image) error {
 	return jpeg.Encode(f, img, &jpeg.Options{jpeg.DefaultQuality})
 }
 
-func fetchRandomMedia(db *sql.DB, session *instagram.Session) (*Media, error) {
-
-	// get a list of users
-	users, err := session.GetUsers()
-	if err != nil {
-		return nil, err
-	}
-	if len(users) == 0 {
-		return nil, fmt.Errorf("no users found")
-	}
-	log.Printf("found %d users\n", len(users))
+func fetchRandomMedia(db *sql.DB, session *instagram.Session, users []*instagram.User) (*Media, error) {
 
 	// select a random user
 	user := users[rand.Intn(len(users))]
