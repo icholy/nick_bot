@@ -73,22 +73,5 @@ func (fr *FaceReplacer) AddFaces() (*image.RGBA, error) {
 		)
 	}
 
-	if len(fr.rects) == 0 {
-		face := imaging.Resize(
-			fr.faces[0],
-			bounds.Dx()/3,
-			0,
-			imaging.Lanczos,
-		)
-		face_bounds := face.Bounds()
-		draw.Draw(
-			canvas,
-			bounds,
-			face,
-			bounds.Min.Add(image.Pt(-bounds.Max.X/2+face_bounds.Max.X/2, -bounds.Max.Y+int(float64(face_bounds.Max.Y)/1.9))),
-			draw.Over,
-		)
-	}
-
 	return canvas, nil
 }
