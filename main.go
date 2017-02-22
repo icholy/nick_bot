@@ -23,6 +23,8 @@ import (
 var (
 	username = flag.String("username", "", "instagram username")
 	password = flag.String("password", "", "instagram password")
+	interval = flag.Duration("interval", time.Minute*30, "posting interval")
+	minfaces = flag.Int("minfaces", 1, "minimum faces")
 )
 
 type Media struct {
@@ -85,8 +87,8 @@ func start(db *sql.DB) error {
 		return err
 	}
 
-	if faceReplacer.NumFaces() == 0 {
-		return fmt.Errorf("no faces found")
+	if faceReplacer.NumFaces() < *minfaces {
+		return fmt.Errorf("not enough faces")
 	}
 	log.Printf("found %d face(s) in image\n", faceReplacer.NumFaces())
 
@@ -117,7 +119,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	for _ = range time.Tick(time.Minute * 10) {
+	for _ = range time.Tick(*interval) {
 		log.Println("trying to post an image")
 		if err := start(db); err != nil {
 			log.Printf("error: %s\n", err)
