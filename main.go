@@ -25,6 +25,7 @@ var (
 	password = flag.String("password", "", "instagram password")
 	interval = flag.Duration("interval", time.Minute*30, "posting interval")
 	minfaces = flag.Int("minfaces", 1, "minimum faces")
+	upload   = flag.Bool("upload", true, "enable photo uploading")
 )
 
 type Media struct {
@@ -105,8 +106,12 @@ func start(db *sql.DB) error {
 
 	log.Printf("written to %s\n", outpath)
 
-	caption := fmt.Sprintf("photocred goes to: %s", media.Username)
-	return session.UploadPhoto(outpath, caption)
+	if *upload {
+		caption := fmt.Sprintf("photocred goes to: %s", media.Username)
+		return session.UploadPhoto(outpath, caption)
+	}
+
+	return nil
 }
 
 func main() {
