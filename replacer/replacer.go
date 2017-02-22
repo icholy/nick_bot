@@ -5,11 +5,9 @@ import (
 	"flag"
 	"image"
 	"image/draw"
-	"image/jpeg"
-	_ "image/png"
-	"io"
 
 	"github.com/disintegration/imaging"
+
 	"github.com/icholy/nick_bot/replacer/facefinder"
 )
 
@@ -21,13 +19,7 @@ type FaceReplacer struct {
 	faces FaceList
 }
 
-func New(imageReader io.Reader, facesPath string) (*FaceReplacer, error) {
-
-	// read base image
-	base, err := jpeg.Decode(imageReader)
-	if err != nil {
-		return nil, err
-	}
+func New(base image.Image, facesPath string) (*FaceReplacer, error) {
 
 	// read faces
 	var faces FaceList

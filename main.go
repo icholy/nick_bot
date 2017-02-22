@@ -3,13 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
+	"image"
 	"image/jpeg"
+	_ "image/png"
 	"log"
 	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/icholy/nick_bot/instagram"
 	"github.com/icholy/nick_bot/replacer"
@@ -19,6 +20,15 @@ var (
 	username = flag.String("username", "", "instagram username")
 	password = flag.String("password", "", "instagram password")
 )
+
+func writeImage(filename string, img image.Image) error {
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return jpeg.Encode(f, img, &jpeg.Options{jpeg.DefaultQuality})
+}
 
 func try(session *instagram.Session, users []*instagram.User) error {
 
@@ -41,21 +51,34 @@ func try(session *instagram.Session, users []*instagram.User) error {
 	log.Printf("randomly selected id %s\n", mediaID)
 
 	// get the url
-	image, err := session.GetUserImage(mediaID)
+	media, err := session.GetUserImage(mediaID)
 	if err != nil {
 		return err
 	}
-	log.Printf("got url for media id: %s\n", image.URL)
+	log.Printf("got url for media id: %s\n", media.URL)
 
 	// get the image
-	resp, err := http.Get(image.URL)
+	resp, err := http.Get(media.URL)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 	log.Printf("fetched the image\n")
 
-	faceReplacer, err := replacer.New(resp.Body, "faces")
+	// decode the image
+	baseImage, _, err := image.Decode(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	// writing image
+	original := filepath.Join("output", mediaID+"_original.jpeg")
+	if err := writeImage(original, baseImage); err != nil {
+		return err
+	}
+	fmt.Printf("saved original to %s\n", original)
+
+	faceReplacer, err := replacer.New(baseImage, "faces")
 	if err != nil {
 		return err
 	}
@@ -70,15 +93,9 @@ func try(session *instagram.Session, users []*instagram.User) error {
 		log.Fatal(err)
 	}
 
-	outpath := filepath.Join("output", mediaID+".jpeg")
-	f, err := os.Create(outpath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
-	if err := jpeg.Encode(f, img, &jpeg.Options{jpeg.DefaultQuality}); err != nil {
-		log.Fatal(err)
+	outpath := filepath.Join("output", mediaID+"_nick.jpeg")
+	if err := writeImage(outpath, img); err != nil {
+		return err
 	}
 
 	log.Printf("written to %s\n", outpath)
@@ -106,13 +123,7 @@ func main() {
 	log.Printf("found %d users\n", len(users))
 
 	// keep trying
-	for i := 0; i < 10; i++ {
-		log.Printf("attempt: %d\n", i)
-		err := try(session, users)
-		if err == nil {
-			break
-		}
-		log.Printf("error: %s\n", err)
-		time.Sleep(time.Second * 30)
+	if err := try(session, users); err != nil {
+		log.Fatal(err)
 	}
 }
