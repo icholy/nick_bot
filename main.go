@@ -37,31 +37,21 @@ func (m *Media) String() string {
 	return fmt.Sprintf("%s: %s", m.Username, m.URL)
 }
 
-func main() {
-	flag.Parse()
-
-	db, err := sql.Open("sqlite3", "media.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := createDatabase(db); err != nil {
-		log.Fatal(err)
-	}
+func start(db *sql.DB) error {
 
 	session, err := instagram.New(*username, *password)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer session.Close()
 
 	// get a list of users
 	users, err := session.GetUsers()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	if len(users) == 0 {
-		log.Fatalf("no users found")
+		return fmt.Errorf("no users found")
 	}
 	log.Printf("found %d users\n", len(users))
 
@@ -70,7 +60,7 @@ func main() {
 	for i := 0; true; i++ {
 
 		if i > 10 {
-			log.Fatalf("too many failed attempts")
+			return fmt.Errorf("too many failed attempts")
 		}
 
 		log.Printf("fetch attempt %d\n", i+1)
@@ -86,31 +76,54 @@ func main() {
 
 	faceReplacer, err := replacer.New(media.Image, "faces")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	facecount := faceReplacer.NumFaces()
 
 	if err := saveMedia(db, media, facecount); err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	if faceReplacer.NumFaces() == 0 {
-		log.Fatalf("no faces found")
+		return fmt.Errorf("no faces found")
 	}
 	log.Printf("found %d face(s) in image\n", faceReplacer.NumFaces())
 
 	newImage, err := faceReplacer.AddFaces()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	outpath := filepath.Join("output", media.ID+"_nick.jpeg")
 	if err := writeImage(outpath, newImage); err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	log.Printf("written to %s\n", outpath)
+	return nil
+}
+
+func main() {
+	flag.Parse()
+
+	db, err := sql.Open("sqlite3", "media.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	if err := createDatabase(db); err != nil {
+		log.Fatal(err)
+	}
+
+	for _ = range time.Tick(time.Minute * 10) {
+		log.Println("trying to post an image")
+		if err := start(db); err != nil {
+			log.Printf("error: %s\n", err)
+		}
+	}
+
 }
 
 func writeImage(filename string, img image.Image) error {
