@@ -20,22 +20,7 @@ var (
 	password = flag.String("password", "", "instagram password")
 )
 
-func try() error {
-	session, err := instagram.New(*username, *password)
-	if err != nil {
-		return err
-	}
-	defer session.Close()
-
-	// get a list of users
-	users, err := session.GetUsers()
-	if err != nil {
-		return err
-	}
-	if len(users) == 0 {
-		return fmt.Errorf("no users found")
-	}
-	log.Printf("found %d users\n", len(users))
+func try(session *instagram.Session, users []*instagram.User) error {
 
 	// select a random user
 	user := users[rand.Intn(len(users))]
@@ -102,8 +87,22 @@ func try() error {
 
 func main() {
 	flag.Parse()
+	session, err := instagram.New(*username, *password)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// get a list of users
+	users, err := session.GetUsers()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(users) == 0 {
+		log.Fatalf("no users found")
+	}
+	log.Printf("found %d users\n", len(users))
+	defer session.Close()
 	for {
-		err := try()
+		err := try(session, users)
 		if err == nil {
 			break
 		}
