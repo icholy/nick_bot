@@ -5,6 +5,7 @@ import (
 	"flag"
 	"image"
 	"image/draw"
+	"image/jpeg"
 	_ "image/png"
 	"io"
 
@@ -23,7 +24,7 @@ type FaceReplacer struct {
 func New(imageReader io.Reader, facesPath string) (*FaceReplacer, error) {
 
 	// read base image
-	base, _, err := image.Decode(imageReader)
+	base, err := jpeg.Decode(imageReader)
 	if err != nil {
 		return nil, err
 	}
