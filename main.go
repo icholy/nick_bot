@@ -87,11 +87,14 @@ func try(session *instagram.Session, users []*instagram.User) error {
 
 func main() {
 	flag.Parse()
+
+	// login
 	session, err := instagram.New(*username, *password)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer session.Close()
+
 	// get a list of users
 	users, err := session.GetUsers()
 	if err != nil {
@@ -101,7 +104,10 @@ func main() {
 		log.Fatalf("no users found")
 	}
 	log.Printf("found %d users\n", len(users))
-	for {
+
+	// keep trying
+	for i := 0; i < 10; i++ {
+		log.Printf("attempt: %d\n", i)
 		err := try(session, users)
 		if err == nil {
 			break
