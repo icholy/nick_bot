@@ -12,7 +12,7 @@ import (
 )
 
 var haarCascade = flag.String("haar", "haarcascade_frontalface_alt.xml", "The location of the Haar Cascade XML configuration to be provided to OpenCV.")
-var margin = flag.Float64("margin", 30.0, "The face rectangle margin")
+var margin = flag.Float64("margin", 50.0, "The face rectangle margin")
 
 type FaceReplacer struct {
 	base   image.Image
