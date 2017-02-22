@@ -3,8 +3,6 @@ package replacer
 import (
 	"image"
 	"image/draw"
-	"log"
-	"os"
 )
 
 func rectMargin(pct float64, rect image.Rectangle) image.Rectangle {
@@ -20,18 +18,6 @@ func rectMargin(pct float64, rect image.Rectangle) image.Rectangle {
 		rect.Max.X+padding_width,
 		rect.Max.Y+padding_height,
 	)
-}
-
-func loadImage(file string) image.Image {
-	reader, err := os.Open(file)
-	if err != nil {
-		log.Fatalf("error loading %s: %s", file, err)
-	}
-	img, _, err := image.Decode(reader)
-	if err != nil {
-		log.Fatalf("error loading %s: %s", file, err)
-	}
-	return img
 }
 
 func canvasFromImage(i image.Image) *image.RGBA {

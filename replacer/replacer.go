@@ -5,11 +5,8 @@ import (
 	"flag"
 	"image"
 	"image/draw"
-	"image/jpeg"
 	_ "image/png"
-	"log"
-	"os"
-	"path/filepath"
+	"io"
 
 	"github.com/disintegration/imaging"
 	"github.com/icholy/nick_bot/replacer/facefinder"
@@ -23,15 +20,17 @@ type FaceReplacer struct {
 	faces FaceList
 }
 
-func New(imagePath string, facesPath string) (*FaceReplacer, error) {
+func New(imageReader io.Reader, facesPath string) (*FaceReplacer, error) {
 
 	// read base image
-	base := loadImage(imagePath)
+	base, _, err := image.Decode(imageReader)
+	if err != nil {
+		return nil, err
+	}
 
 	// read faces
 	var faces FaceList
-	err := faces.Load(facesPath)
-	if err != nil {
+	if err := faces.Load(facesPath); err != nil {
 		return nil, err
 	}
 	if len(faces) == 0 {
@@ -44,6 +43,7 @@ func New(imagePath string, facesPath string) (*FaceReplacer, error) {
 	return &FaceReplacer{
 		rects: finder.Detect(base),
 		faces: faces,
+		base:  base,
 	}, nil
 }
 
@@ -92,27 +92,4 @@ func (fr *FaceReplacer) AddFaces() (*image.RGBA, error) {
 	}
 
 	return canvas, nil
-}
-
-func main() {
-	flag.Parse()
-
-	facesPath, err := filepath.Abs("faces")
-	if err != nil {
-		panic(err)
-	}
-
-	file := flag.Arg(0)
-
-	replacer, err := New(file, facesPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	canvas, err := replacer.AddFaces()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	jpeg.Encode(os.Stdout, canvas, &jpeg.Options{jpeg.DefaultQuality})
 }
