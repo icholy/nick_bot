@@ -27,6 +27,7 @@ var (
 	interval = flag.Duration("interval", time.Minute*30, "posting interval")
 	minfaces = flag.Int("minfaces", 1, "minimum faces")
 	upload   = flag.Bool("upload", true, "enable photo uploading")
+	testimg  = flag.String("test.image", "", "test image")
 )
 
 type Media struct {
@@ -39,6 +40,34 @@ type Media struct {
 
 func (m *Media) String() string {
 	return fmt.Sprintf("%s: %s", m.Username, m.URL)
+}
+
+func testImage(imgfile string) error {
+	f, err := os.Open(imgfile)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	baseImage, _, err := image.Decode(f)
+	if err != nil {
+		return err
+	}
+	faceReplacer, err := replacer.New(baseImage, "faces")
+	if err != nil {
+		return err
+	}
+	defer faceReplacer.Close()
+	if faceReplacer.NumFaces() < *minfaces {
+		return fmt.Errorf("not enough faces")
+	}
+	log.Printf("found %d face(s) in image\n", faceReplacer.NumFaces())
+
+	newImage, err := faceReplacer.AddFaces()
+	if err != nil {
+		return err
+	}
+
+	return jpeg.Encode(os.Stdout, newImage, &jpeg.Options{jpeg.DefaultQuality})
 }
 
 func start(db *sql.DB, caption string) error {
@@ -117,6 +146,13 @@ func start(db *sql.DB, caption string) error {
 
 func main() {
 	flag.Parse()
+
+	if *testimg != "" {
+		if err := testImage(*testimg); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 
 	captionIndex := 0
 	captions, err := readCaptions("captions.txt")
