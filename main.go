@@ -57,10 +57,11 @@ func testImage(imgfile string) error {
 		return err
 	}
 	defer faceReplacer.Close()
+
+	log.Printf("found %d face(s) in image\n", faceReplacer.NumFaces())
 	if faceReplacer.NumFaces() < *minfaces {
 		return fmt.Errorf("not enough faces")
 	}
-	log.Printf("found %d face(s) in image\n", faceReplacer.NumFaces())
 
 	newImage, err := faceReplacer.AddFaces()
 	if err != nil {
