@@ -96,7 +96,7 @@ func testImageDir(dir string) error {
 	return nil
 }
 
-func start(db *sql.DB, caption string) error {
+func attempt(db *sql.DB, caption string) error {
 
 	session, err := instagram.New(*username, *password)
 	if err != nil {
@@ -213,7 +213,7 @@ func main() {
 		}
 
 		log.Println("trying to post an image")
-		if err := start(db, caption); err != nil {
+		if err := attempt(db, caption); err != nil {
 			log.Printf("error: %s\n", err)
 		}
 		time.Sleep(*interval)
