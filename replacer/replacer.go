@@ -60,6 +60,7 @@ func (fr *FaceReplacer) AddFaces() (*image.RGBA, error) {
 
 	red := color.RGBA{255, 0, 0, 255}
 	green := color.RGBA{0, 255, 0, 255}
+	blue := color.RGBA{0, 0, 255, 255}
 
 	for _, value := range fr.rects {
 
@@ -82,6 +83,7 @@ func (fr *FaceReplacer) AddFaces() (*image.RGBA, error) {
 		if *showRects {
 			drawRect(canvas, value, red)
 			drawRect(canvas, rect, green)
+			drawRect(canvas, face.Rect.Add(rect.Min), blue)
 		}
 	}
 
