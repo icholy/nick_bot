@@ -93,7 +93,7 @@ func (fr *FaceReplacer) AddFaces() (*image.NRGBA, error) {
 			if *showRectPadding {
 				drawRect(canvas, paddingRect, green)
 			}
-			if *showRectPadding {
+			if *showRectPlacement {
 				drawRect(canvas, placementRect, blue)
 			}
 		}
