@@ -159,6 +159,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	shuffle(captions)
 
 	db, err := sql.Open("sqlite3", "media.db")
 	if err != nil {
