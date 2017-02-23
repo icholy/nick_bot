@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"image"
+	"image/color"
 	"image/draw"
 
 	"github.com/disintegration/imaging"
@@ -13,6 +14,7 @@ import (
 
 var haarCascade = flag.String("haar", "haarcascade_frontalface_alt.xml", "The location of the Haar Cascade XML configuration to be provided to OpenCV.")
 var margin = flag.Float64("margin", 50.0, "The face rectangle margin")
+var showRects = flag.Bool("show.rects", false, "Show the detection rectangles")
 
 type FaceReplacer struct {
 	base   image.Image
@@ -56,8 +58,12 @@ func (fr *FaceReplacer) AddFaces() (*image.RGBA, error) {
 	bounds := fr.base.Bounds()
 	canvas := canvasFromImage(fr.base)
 
-	for _, rect := range fr.rects {
-		rect := rectMargin(*margin, rect)
+	red := color.RGBA{255, 0, 0, 255}
+	green := color.RGBA{0, 255, 0, 255}
+
+	for _, value := range fr.rects {
+
+		rect := rectMargin(*margin, value)
 
 		newFace := fr.faces.Random()
 		if newFace == nil {
@@ -72,6 +78,11 @@ func (fr *FaceReplacer) AddFaces() (*image.RGBA, error) {
 			bounds.Min,
 			draw.Over,
 		)
+
+		if *showRects {
+			drawRect(canvas, value, red)
+			drawRect(canvas, rect, green)
+		}
 	}
 
 	return canvas, nil
