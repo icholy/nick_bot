@@ -6,7 +6,7 @@ import (
 	"image/draw"
 )
 
-func rectMargin(pct float64, rect image.Rectangle) image.Rectangle {
+func addRectPadding(pct float64, rect image.Rectangle) image.Rectangle {
 	width := float64(rect.Max.X - rect.Min.X)
 	height := float64(rect.Max.Y - rect.Min.Y)
 
@@ -21,14 +21,14 @@ func rectMargin(pct float64, rect image.Rectangle) image.Rectangle {
 	)
 }
 
-func canvasFromImage(i image.Image) *image.RGBA {
+func canvasFromImage(i image.Image) *image.NRGBA {
 	bounds := i.Bounds()
-	canvas := image.NewRGBA(bounds)
+	canvas := image.NewNRGBA(bounds)
 	draw.Draw(canvas, bounds, i, bounds.Min, draw.Src)
 	return canvas
 }
 
-func drawRect(img *image.RGBA, rect image.Rectangle, c color.Color) {
+func drawRect(img *image.NRGBA, rect image.Rectangle, c color.Color) {
 	var (
 		x1 = rect.Min.X
 		x2 = rect.Max.X

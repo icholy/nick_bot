@@ -5,7 +5,6 @@ import (
 	"flag"
 	"image"
 	"image/color"
-	"image/draw"
 
 	"github.com/disintegration/imaging"
 
@@ -15,6 +14,7 @@ import (
 var haarCascade = flag.String("haar", "haarcascade_frontalface_alt.xml", "The location of the Haar Cascade XML configuration to be provided to OpenCV.")
 var margin = flag.Float64("margin", 50.0, "The face rectangle margin")
 var showRects = flag.Bool("show.rects", false, "Show the detection rectangles")
+var faceOpacity = flag.Float64("face.opacity", 1.0, "Face opacity [0-255]")
 
 type FaceReplacer struct {
 	base   image.Image
@@ -53,38 +53,35 @@ func (fr *FaceReplacer) NumFaces() int {
 	return len(fr.rects)
 }
 
-func (fr *FaceReplacer) AddFaces() (*image.RGBA, error) {
+func (fr *FaceReplacer) AddFaces() (*image.NRGBA, error) {
 
-	bounds := fr.base.Bounds()
-	canvas := canvasFromImage(fr.base)
+	var (
+		canvas = canvasFromImage(fr.base)
 
-	red := color.RGBA{255, 0, 0, 255}
-	green := color.RGBA{0, 255, 0, 255}
-	blue := color.RGBA{0, 0, 255, 255}
+		red   = color.RGBA{255, 0, 0, 255}
+		green = color.RGBA{0, 255, 0, 255}
+		blue  = color.RGBA{0, 0, 255, 255}
+	)
 
-	for _, value := range fr.rects {
+	for _, rect := range fr.rects {
 
-		rect := rectMargin(*margin, value)
+		srcFaceImg := fr.faces.Random()
 
-		newFace := fr.faces.Random()
-		if newFace == nil {
-			panic("nil face")
-		}
-		face := imaging.Fit(newFace, rect.Dx(), rect.Dy(), imaging.Lanczos)
+		// add padding around detected face rect
+		paddedRect := addRectPadding(*margin, rect)
 
-		faceRect := getRectCenteredIn(face.Rect, rect)
+		// resize the face image to fit inside the padded rect
+		faceImg := imaging.Fit(srcFaceImg, paddedRect.Dx(), paddedRect.Dy(), imaging.Lanczos)
 
-		draw.Draw(
-			canvas,
-			faceRect,
-			face,
-			bounds.Min,
-			draw.Over,
-		)
+		// center the face rect size inside the padded rect
+		faceRect := getRectCenteredIn(faceImg.Rect, paddedRect)
+
+		// draw the face
+		canvas = imaging.Overlay(canvas, faceImg, faceRect.Min, *faceOpacity)
 
 		if *showRects {
-			drawRect(canvas, value, red)
-			drawRect(canvas, rect, green)
+			drawRect(canvas, rect, red)
+			drawRect(canvas, paddedRect, green)
 			drawRect(canvas, faceRect, blue)
 		}
 	}
