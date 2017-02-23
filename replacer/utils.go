@@ -51,29 +51,21 @@ func drawRect(img *image.RGBA, rect image.Rectangle, c color.Color) {
 	}
 }
 
-func getRectCenter(rect image.Rectangle) image.Point {
-	return image.Point{
-		X: rect.Min.X + rect.Dx()/2,
-		Y: rect.Min.Y + rect.Dy()/2,
+func getRectCenteredIn(child, parent image.Rectangle) image.Rectangle {
+	center := image.Point{
+		X: parent.Min.X + parent.Dx()/2,
+		Y: parent.Min.Y + parent.Dy()/2,
 	}
-}
-
-func getRectCenteredAt(rect image.Rectangle, p image.Point) image.Rectangle {
-	halfX := rect.Dx() / 2
-	halfY := rect.Dy() / 2
+	halfX := child.Dx() / 2
+	halfY := child.Dy() / 2
 	return image.Rectangle{
 		Min: image.Point{
-			X: p.X - halfX,
-			Y: p.Y - halfY,
+			X: center.X - halfX,
+			Y: center.Y - halfY,
 		},
 		Max: image.Point{
-			X: p.X + halfX,
-			Y: p.Y + halfY,
+			X: center.X + halfX,
+			Y: center.Y + halfY,
 		},
 	}
-}
-
-func getRectCenteredIn(child, parent image.Rectangle) image.Rectangle {
-	center := getRectCenter(parent)
-	return getRectCenteredAt(child, center)
 }
