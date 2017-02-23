@@ -72,9 +72,11 @@ func (fr *FaceReplacer) AddFaces() (*image.RGBA, error) {
 		}
 		face := imaging.Fit(newFace, rect.Dx(), rect.Dy(), imaging.Lanczos)
 
+		faceRect := getRectCenteredIn(face.Rect, rect)
+
 		draw.Draw(
 			canvas,
-			rect,
+			faceRect,
 			face,
 			bounds.Min,
 			draw.Over,
@@ -83,7 +85,7 @@ func (fr *FaceReplacer) AddFaces() (*image.RGBA, error) {
 		if *showRects {
 			drawRect(canvas, value, red)
 			drawRect(canvas, rect, green)
-			drawRect(canvas, face.Rect.Add(rect.Min), blue)
+			drawRect(canvas, faceRect, blue)
 		}
 	}
 
