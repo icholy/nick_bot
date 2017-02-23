@@ -8,6 +8,8 @@ import (
 	"image"
 	"image/jpeg"
 	_ "image/png"
+	"io"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -28,6 +30,7 @@ var (
 	minfaces = flag.Int("minfaces", 1, "minimum faces")
 	upload   = flag.Bool("upload", false, "enable photo uploading")
 	testimg  = flag.String("test.image", "", "test image")
+	testdir  = flag.String("test.dir", "", "test a directory of images")
 )
 
 type Media struct {
@@ -42,7 +45,7 @@ func (m *Media) String() string {
 	return fmt.Sprintf("%s: %s", m.Username, m.URL)
 }
 
-func testImage(imgfile string) error {
+func testImage(imgfile string, w io.Writer) error {
 	f, err := os.Open(imgfile)
 	if err != nil {
 		return err
@@ -68,7 +71,29 @@ func testImage(imgfile string) error {
 		return err
 	}
 
-	return jpeg.Encode(os.Stdout, newImage, &jpeg.Options{jpeg.DefaultQuality})
+	return jpeg.Encode(w, newImage, &jpeg.Options{jpeg.DefaultQuality})
+}
+
+func testImageDir(dir string) error {
+	entries, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+	for _, e := range entries {
+		var (
+			srcFile = filepath.Join(dir, e.Name())
+			dstFile = filepath.Join(dir, "nick_"+e.Name())
+		)
+		f, err := os.Create(dstFile)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		if err := testImage(srcFile, f); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func start(db *sql.DB, caption string) error {
@@ -149,7 +174,14 @@ func main() {
 	flag.Parse()
 
 	if *testimg != "" {
-		if err := testImage(*testimg); err != nil {
+		if err := testImage(*testimg, os.Stdout); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+
+	if *testdir != "" {
+		if err := testImageDir(*testdir); err != nil {
 			log.Fatal(err)
 		}
 		return
