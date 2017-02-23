@@ -202,12 +202,14 @@ func fetchRandomMedia(db *sql.DB, session *instagram.Session, users []*instagram
 
 	// select a random user
 	user := users[rand.Intn(len(users))]
+	log.Printf("Randomly selected user: %s\n", user.Name)
 
 	// get a list of media ids for the user
 	medias, err := session.GetUserMediaIDS(user)
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("Got %d media items\n", len(medias))
 
 	// find an unused media id
 	var mediaID string
@@ -224,7 +226,7 @@ func fetchRandomMedia(db *sql.DB, session *instagram.Session, users []*instagram
 		}
 	}
 	if mediaID == "" {
-		return nil, fmt.Errorf("no unused media found")
+		return nil, fmt.Errorf("all media items have already been used")
 	}
 
 	// get the url
