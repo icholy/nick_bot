@@ -26,7 +26,7 @@ var (
 	password = flag.String("password", "", "instagram password")
 	interval = flag.Duration("interval", time.Minute*30, "posting interval")
 	minfaces = flag.Int("minfaces", 1, "minimum faces")
-	upload   = flag.Bool("upload", true, "enable photo uploading")
+	upload   = flag.Bool("upload", false, "enable photo uploading")
 	testimg  = flag.String("test.image", "", "test image")
 )
 
