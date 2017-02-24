@@ -49,6 +49,7 @@ func (mi *MediaIndex) CreateDatabase() error {
 			media_url,  TEXT,
 			user_id     TEXT,
 			user_name   TEXT,
+			like_count  INTEGER,
 			face_count  INTEGER,
 			created_at  INTEGER,
 			media_state INTEGER
@@ -57,18 +58,26 @@ func (mi *MediaIndex) CreateDatabase() error {
 	return err
 }
 
-func (mi *MediaIndex) Save(media *Media) error {
+func (mi *MediaIndex) Put(media *Media) error {
 	_, err := mi.db.Exec(
-		`INSERT INTO media VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		`INSERT INTO media VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		media.ID,
 		media.URL,
 		media.UserID,
 		media.Username,
+		media.LikeCount,
 		media.FaceCount,
 		media.CreateAt.Unix(),
 		media.State,
 	)
 	return err
+}
+
+func (mi *MediaIndex) Get(id string) (*Media, error) {
+	row := mi.db.QueryRow(
+		`SELECT * FROM media WHERE media_id = ? LIMIT 1`, id,
+	)
+	return scanMedia(row)
 }
 
 func (mi *MediaIndex) Has(id string) (bool, error) {
@@ -97,4 +106,38 @@ func (mi *MediaIndex) Mark(id string, state MediaState) error {
 		return fmt.Errorf("media not found: %s", id)
 	}
 	return nil
+}
+
+func (mi *MediaIndex) Search(minFaces int) (*Media, error) {
+	row := mi.db.QueryRow(`
+		SELECT *
+		FROM media
+		WHERE state == ?
+		  AND face_count >= ?
+		ORDER BY face_count ASC,
+		         like_count ASC
+		LIMIT 1
+	`, MediaAvailable, minFaces)
+	return scanMedia(row)
+}
+
+func scanMedia(row *sql.Row) (*Media, error) {
+	var (
+		media     Media
+		createdAt int64
+	)
+	if err := row.Scan(
+		&media.ID,
+		&media.URL,
+		&media.UserID,
+		&media.Username,
+		&media.LikeCount,
+		&media.FaceCount,
+		&createdAt,
+		&media.State,
+	); err != nil {
+		return nil, err
+	}
+	media.CreateAt = time.Unix(createdAt, 0)
+	return &media, nil
 }
