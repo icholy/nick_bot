@@ -1,10 +1,11 @@
-package mediaindex
+package index
 
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"time"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type MediaState int
@@ -26,23 +27,23 @@ type Media struct {
 	State     MediaState
 }
 
-type MediaIndex struct {
+type Index struct {
 	db *sql.DB
 }
 
-func Open(database string) (*MediaIndex, error) {
+func Open(database string) (*Index, error) {
 	db, err := sql.Open("sqlite3", database)
 	if err != nil {
 		return nil, err
 	}
-	return &MediaIndex{db}, nil
+	return &Index{db}, nil
 }
 
-func (mi *MediaIndex) Close() error {
+func (mi *Index) Close() error {
 	return mi.db.Close()
 }
 
-func (mi *MediaIndex) CreateDatabase() error {
+func (mi *Index) CreateDatabase() error {
 	_, err := mi.db.Exec(`
 		CREATE TABLE IF NOT EXISTS media (
 			media_id    TEXT,
@@ -58,7 +59,7 @@ func (mi *MediaIndex) CreateDatabase() error {
 	return err
 }
 
-func (mi *MediaIndex) Put(media *Media) error {
+func (mi *Index) Put(media *Media) error {
 	_, err := mi.db.Exec(
 		`INSERT INTO media VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		media.ID,
@@ -73,14 +74,14 @@ func (mi *MediaIndex) Put(media *Media) error {
 	return err
 }
 
-func (mi *MediaIndex) Get(id string) (*Media, error) {
+func (mi *Index) Get(id string) (*Media, error) {
 	row := mi.db.QueryRow(
 		`SELECT * FROM media WHERE media_id = ? LIMIT 1`, id,
 	)
 	return scanMedia(row)
 }
 
-func (mi *MediaIndex) Has(id string) (bool, error) {
+func (mi *Index) Has(id string) (bool, error) {
 	var count int
 	if err := mi.db.QueryRow(
 		`SELECT COUNT(1) FROM media WHERE media_id = ? LIMIT 1`, id,
@@ -90,7 +91,7 @@ func (mi *MediaIndex) Has(id string) (bool, error) {
 	return count == 1, nil
 }
 
-func (mi *MediaIndex) Mark(id string, state MediaState) error {
+func (mi *Index) Mark(id string, state MediaState) error {
 	resp, err := mi.db.Exec(
 		`UPDATE media SET state = ? WHERE media_id = ? LIMIT 1`,
 		state, id,
@@ -108,7 +109,7 @@ func (mi *MediaIndex) Mark(id string, state MediaState) error {
 	return nil
 }
 
-func (mi *MediaIndex) Search(minFaces int) (*Media, error) {
+func (mi *Index) Search(minFaces int) (*Media, error) {
 	row := mi.db.QueryRow(`
 		SELECT *
 		FROM media
