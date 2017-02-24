@@ -242,23 +242,23 @@ func fetchRandomMedia(db *sql.DB, session *instagram.Session, users []*instagram
 	}
 	log.Printf("Got %d medias\n", len(medias))
 
-	// find an unused media id
-	shuffleMedias(medias)
-
-	var media *instagram.Media
-
-	for _, m := range medias {
-		ok, err := hasMediaID(db, m.ID)
+	// find unused medias
+	var unused []*instagram.Media
+	for _, media := range medias {
+		ok, err := hasMediaID(db, media.ID)
 		if err != nil {
 			return nil, err
 		}
 		if !ok {
-			media = m
+			unused = append(unused, media)
 		}
 	}
-	if media == nil {
+	if len(unused) == 0 {
 		return nil, fmt.Errorf("no unused images for user")
 	}
+
+	// select a random media
+	media := unused[rand.Intn(len(unused))]
 
 	// get the image
 	resp, err := http.Get(media.URL)
