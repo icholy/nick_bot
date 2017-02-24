@@ -322,13 +322,6 @@ func shuffle(slice []string) {
 	}
 }
 
-func shuffleMedias(slice []*instagram.Media) {
-	for i := range slice {
-		j := rand.Intn(i + 1)
-		slice[i], slice[j] = slice[j], slice[i]
-	}
-}
-
 func readCaptions(filename string) ([]string, error) {
 	f, err := os.Open(filename)
 	if err != nil {
