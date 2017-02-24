@@ -95,7 +95,7 @@ func testImageDir(dir string) error {
 
 func attempt(db *sql.DB, caption string) error {
 
-	session, err := instagram.New(*username, *password)
+	session, err := instagram.NewSession(*username, *password)
 	if err != nil {
 		return err
 	}
