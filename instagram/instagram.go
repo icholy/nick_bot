@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ahmdrz/goinsta"
+	"github.com/ahmdrz/goinsta/response"
 	"time"
 )
 
@@ -45,6 +46,16 @@ func (s *Session) Close() error {
 	return s.insta.Logout()
 }
 
+func (Session) getLargestCandidate(candidates []response.ImageCandidate) response.ImageCandidate {
+	m := candidates[0]
+	for _, c := range candidates {
+		if c.Width*c.Height > m.Width*m.Height {
+			m = c
+		}
+	}
+	return m
+}
+
 func (s *Session) GetRecentUserMedias(u *User) ([]*Media, error) {
 	resp, err := s.insta.FirstUserFeed(u.ID)
 	if err != nil {
@@ -59,13 +70,7 @@ func (s *Session) GetRecentUserMedias(u *User) ([]*Media, error) {
 		if len(candidates) == 0 {
 			continue
 		}
-		// choose the largest version of the image
-		m := candidates[0]
-		for _, c := range candidates {
-			if c.Width*c.Height > m.Width*m.Height {
-				m = c
-			}
-		}
+		m := s.getLargestCandidate(item.ImageVersions2.Candidates)
 		images = append(images, &Media{
 			ID:        item.ID,
 			URL:       m.URL,
