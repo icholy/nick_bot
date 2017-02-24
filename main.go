@@ -148,11 +148,10 @@ func attempt(db *sql.DB, caption string) error {
 	}
 
 	outpath := filepath.Join("output", media.ID+"_nick.jpeg")
+	log.Printf("writing to %s\n", outpath)
 	if err := writeImage(outpath, newImage); err != nil {
 		return err
 	}
-
-	log.Printf("written to %s\n", outpath)
 
 	if *upload {
 		caption := fmt.Sprintf("%s\n\nphotocred goes to: @%s", caption, media.Username)
