@@ -21,17 +21,17 @@ var showRectDetection = flag.Bool("show.rects.detection", true, "Show the detect
 var showRectPadding = flag.Bool("show.rects.padding", true, "Show the padding rects")
 var showRectPlacement = flag.Bool("show.rects.placement", true, "Show the placement rects")
 
-type FaceReplacer struct {
+type Replacer struct {
 	base  image.Image
 	rects []image.Rectangle
 	faces FaceList
 }
 
-func New(base image.Image, facesPath string) (*FaceReplacer, error) {
+func New(base image.Image, facesPath string) (*Replacer, error) {
 
 	// read faces
-	var faces FaceList
-	if err := faces.Load(facesPath); err != nil {
+	faces, err := loadFaces(facesPath)
+	if err != nil {
 		return nil, err
 	}
 	if len(faces) == 0 {
@@ -39,30 +39,30 @@ func New(base image.Image, facesPath string) (*FaceReplacer, error) {
 	}
 
 	// find faces in base image
-	return &FaceReplacer{
-		rects: detectFaces(base),
+	return &Replacer{
+		rects: DetectFaces(base),
 		faces: faces,
 		base:  base,
 	}, nil
 }
 
-func (fr *FaceReplacer) NumFaces() int {
-	return len(fr.rects)
+func (rep *Replacer) NumFaces() int {
+	return len(rep.rects)
 }
 
-func (fr *FaceReplacer) AddFaces() (*image.NRGBA, error) {
+func (rep *Replacer) AddFaces() (*image.NRGBA, error) {
 
 	var (
-		canvas = canvasFromImage(fr.base)
+		canvas = canvasFromImage(rep.base)
 
 		red   = color.RGBA{255, 0, 0, 255}
 		green = color.RGBA{0, 255, 0, 255}
 		blue  = color.RGBA{0, 0, 255, 255}
 	)
 
-	for _, faceRect := range fr.rects {
+	for _, faceRect := range rep.rects {
 
-		srcFaceImg := fr.faces.Random()
+		srcFaceImg := rep.faces.Random()
 
 		// add padding around detected face rect
 		paddingRect := addRectPadding(*margin, faceRect)
@@ -94,7 +94,7 @@ func (fr *FaceReplacer) AddFaces() (*image.NRGBA, error) {
 	return canvas, nil
 }
 
-func detectFaces(i image.Image) []image.Rectangle {
+func DetectFaces(i image.Image) []image.Rectangle {
 	var (
 		output  []image.Rectangle
 		cascade = opencv.LoadHaarClassifierCascade(*haarCascade)

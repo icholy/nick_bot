@@ -16,65 +16,45 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-type Face struct {
-	image.Image
-}
-
-func (f *Face) LoadFile(file string) error {
-	reader, err := os.Open(file)
+func loadImage(file string) (image.Image, error) {
+	f, err := os.Open(file)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	f.Image, _, err = image.Decode(reader)
+	defer f.Close()
+	m, _, err := image.Decode(f)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return m, nil
 }
 
-func NewFace(file string) (*Face, error) {
-	face := &Face{}
-	if err := face.LoadFile(file); err != nil {
-		return face, err
-	}
-	return face, nil
-}
-
-func NewMustFace(file string) *Face {
-	face, err := NewFace(file)
-	if err != nil {
-		panic(err)
-	}
-	return face
-}
-
-type FaceList []*Face
+type FaceList []image.Image
 
 func (fl FaceList) Random() image.Image {
 	i := rand.Intn(len(fl))
 	face := fl[i]
 	if rand.Intn(2) == 0 {
-		return imaging.FlipH(face.Image)
+		return imaging.FlipH(face)
 	}
-	return face.Image
+	return face
 }
 
-func (fl *FaceList) Load(dir string) error {
-	if dir == "" {
-		return nil
-	}
+func loadFaces(dir string) (FaceList, error) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	var faces FaceList
 	for _, file := range files {
-		if filepath.Ext(file.Name()) == ".png" {
-			f, err := NewFace(path.Join(dir, file.Name()))
-			if err != nil {
-				return err
-			}
-			*fl = append(*fl, f)
+		if filepath.Ext(file.Name()) != ".png" {
+			continue
 		}
+		m, err := loadImage(path.Join(dir, file.Name()))
+		if err != nil {
+			return nil, err
+		}
+		faces = append(faces, m)
 	}
-	return nil
+	return faces, nil
 }
