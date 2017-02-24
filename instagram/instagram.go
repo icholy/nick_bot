@@ -2,8 +2,10 @@ package instagram
 
 import (
 	"errors"
+	"fmt"
 	"github.com/ahmdrz/goinsta"
 	"github.com/ahmdrz/goinsta/response"
+	"time"
 )
 
 var ErrInvalidResponseStatus = errors.New("instagram: invalid response status")
@@ -14,8 +16,16 @@ type User struct {
 }
 
 type Image struct {
-	ID  string
-	URL string
+	ID        string
+	URL       string
+	LikeCount int
+	PostedAt  time.Time
+}
+
+func (m *Image) String() string {
+	return fmt.Sprintf("Image: [%d likes] @%s %s",
+		m.LikeCount, m.PostedAt, m.URL,
+	)
 }
 
 type Session struct {
@@ -56,8 +66,10 @@ func (Session) getLargestImage(info response.MediaInfoResponse) (*Image, error) 
 		}
 	}
 	return &Image{
-		ID:  item.ID,
-		URL: m.URL,
+		ID:        item.ID,
+		URL:       m.URL,
+		LikeCount: item.LikeCount,
+		PostedAt:  time.Unix(int64(item.Caption.CreatedAt), 0),
 	}, nil
 }
 
@@ -83,8 +95,10 @@ func (s *Session) GetRecentUserImages(u *User) ([]*Image, error) {
 			}
 		}
 		images = append(images, &Image{
-			ID:  item.ID,
-			URL: m.URL,
+			ID:        item.ID,
+			URL:       m.URL,
+			LikeCount: item.LikeCount,
+			PostedAt:  time.Unix(int64(item.Caption.CreatedAt), 0),
 		})
 	}
 	return images, nil
