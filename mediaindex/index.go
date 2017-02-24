@@ -7,6 +7,14 @@ import (
 	"time"
 )
 
+type MediaState int
+
+const (
+	MediaAvailable MediaState = iota
+	MediaRejected
+	MediaUsed
+)
+
 type Media struct {
 	ID        string
 	URL       string
@@ -17,14 +25,6 @@ type Media struct {
 	CreateAt  time.Time
 	State     MediaState
 }
-
-type MediaState int
-
-const (
-	MediaAvailable MediaState = iota
-	MediaRejected
-	MediaUsed
-)
 
 type MediaIndex struct {
 	db *sql.DB
@@ -112,10 +112,8 @@ func (mi *MediaIndex) Search(minFaces int) (*Media, error) {
 	row := mi.db.QueryRow(`
 		SELECT *
 		FROM media
-		WHERE state == ?
-		  AND face_count >= ?
-		ORDER BY face_count ASC,
-		         like_count ASC
+		WHERE state == ? AND face_count >= ?
+		ORDER BY face_count ASC, like_count ASC
 		LIMIT 1
 	`, MediaAvailable, minFaces)
 	return scanMedia(row)
