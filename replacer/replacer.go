@@ -7,10 +7,10 @@ import (
 	"image/color"
 
 	"github.com/disintegration/imaging"
-
-	"github.com/icholy/nick_bot/replacer/facefinder"
+	"github.com/lazywei/go-opencv/opencv"
 )
 
+var minNeighboor = flag.Int("min.neighboor", 5, "the lower this number is, the more faces will be found")
 var haarCascade = flag.String("haar", "haarcascade_frontalface_alt.xml", "The location of the Haar Cascade XML configuration to be provided to OpenCV.")
 var margin = flag.Float64("margin", 50.0, "The face rectangle margin")
 var showRects = flag.Bool("show.rects", false, "Show the detection rectangles")
@@ -22,10 +22,9 @@ var showRectPadding = flag.Bool("show.rects.padding", true, "Show the padding re
 var showRectPlacement = flag.Bool("show.rects.placement", true, "Show the placement rects")
 
 type FaceReplacer struct {
-	base   image.Image
-	rects  []image.Rectangle
-	faces  FaceList
-	finder *facefinder.Finder
+	base  image.Image
+	rects []image.Rectangle
+	faces FaceList
 }
 
 func New(base image.Image, facesPath string) (*FaceReplacer, error) {
@@ -40,18 +39,11 @@ func New(base image.Image, facesPath string) (*FaceReplacer, error) {
 	}
 
 	// find faces in base image
-	finder := facefinder.NewFinder(*haarCascade)
-
 	return &FaceReplacer{
-		rects:  finder.Detect(base),
-		faces:  faces,
-		base:   base,
-		finder: finder,
+		rects: detectFaces(base),
+		faces: faces,
+		base:  base,
 	}, nil
-}
-
-func (fr *FaceReplacer) Close() {
-	fr.finder.Close()
 }
 
 func (fr *FaceReplacer) NumFaces() int {
@@ -100,4 +92,22 @@ func (fr *FaceReplacer) AddFaces() (*image.NRGBA, error) {
 	}
 
 	return canvas, nil
+}
+
+func detectFaces(i image.Image) []image.Rectangle {
+	var (
+		output  []image.Rectangle
+		cascade = opencv.LoadHaarClassifierCascade(*haarCascade)
+	)
+	defer cascade.Release()
+
+	faces := cascade.DetectObjects(opencv.FromImage(i), *minNeighboor)
+	for _, face := range faces {
+		output = append(output, image.Rectangle{
+			image.Point{face.X(), face.Y()},
+			image.Point{face.X() + face.Width(), face.Y() + face.Height()},
+		})
+	}
+
+	return output
 }
