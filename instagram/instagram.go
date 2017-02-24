@@ -32,7 +32,7 @@ type Session struct {
 	insta *goinsta.Instagram
 }
 
-func New(username, password string) (*Session, error) {
+func NewSession(username, password string) (*Session, error) {
 	insta := goinsta.New(username, password)
 	if err := insta.Login(); err != nil {
 		return nil, err
