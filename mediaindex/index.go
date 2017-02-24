@@ -31,7 +31,7 @@ type MediaIndex struct {
 }
 
 func Open(database string) (*MediaIndex, error) {
-	db, err := sql.Open("sqlite3", "media.db")
+	db, err := sql.Open("sqlite3", database)
 	if err != nil {
 		return nil, err
 	}
