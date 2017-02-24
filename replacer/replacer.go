@@ -100,7 +100,6 @@ func detectFaces(i image.Image) []image.Rectangle {
 		cascade = opencv.LoadHaarClassifierCascade(*haarCascade)
 	)
 	defer cascade.Release()
-
 	faces := cascade.DetectObjects(opencv.FromImage(i), *minNeighboor)
 	for _, face := range faces {
 		output = append(output, image.Rectangle{
@@ -108,6 +107,5 @@ func detectFaces(i image.Image) []image.Rectangle {
 			image.Point{face.X() + face.Width(), face.Y() + face.Height()},
 		})
 	}
-
 	return output
 }

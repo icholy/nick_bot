@@ -59,7 +59,6 @@ func testImage(imgfile string, w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	defer faceReplacer.Close()
 
 	log.Printf("found %d face(s) in image\n", faceReplacer.NumFaces())
 	if faceReplacer.NumFaces() < *minfaces {
@@ -137,7 +136,6 @@ func attempt(db *sql.DB, caption string) error {
 	if err != nil {
 		return err
 	}
-	defer faceReplacer.Close()
 
 	facecount := faceReplacer.NumFaces()
 
