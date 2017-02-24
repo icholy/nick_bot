@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ahmdrz/goinsta"
-	"github.com/ahmdrz/goinsta/response"
 	"time"
 )
 
@@ -15,15 +14,15 @@ type User struct {
 	Name string
 }
 
-type Image struct {
+type Media struct {
 	ID        string
 	URL       string
 	LikeCount int
 	PostedAt  time.Time
 }
 
-func (m *Image) String() string {
-	return fmt.Sprintf("Image: [%d likes] @%s %s",
+func (m *Media) String() string {
+	return fmt.Sprintf("Media: [%d likes] @%s %s",
 		m.LikeCount, m.PostedAt, m.URL,
 	)
 }
@@ -46,34 +45,7 @@ func (s *Session) Close() error {
 	return s.insta.Logout()
 }
 
-func (Session) getLargestImage(info response.MediaInfoResponse) (*Image, error) {
-	if len(info.Items) == 0 {
-		return nil, errors.New("no items in media info")
-	}
-	var (
-		item   = info.Items[0]
-		images = item.ImageVersions2.Candidates
-	)
-	if len(images) == 0 {
-		return nil, errors.New("no image candidates")
-	}
-
-	// find the largest image
-	m := images[0]
-	for _, v := range images {
-		if v.Width*v.Height > m.Width*m.Height {
-			m = v
-		}
-	}
-	return &Image{
-		ID:        item.ID,
-		URL:       m.URL,
-		LikeCount: item.LikeCount,
-		PostedAt:  time.Unix(int64(item.Caption.CreatedAt), 0),
-	}, nil
-}
-
-func (s *Session) GetRecentUserImages(u *User) ([]*Image, error) {
+func (s *Session) GetRecentUserMedias(u *User) ([]*Media, error) {
 	resp, err := s.insta.FirstUserFeed(u.ID)
 	if err != nil {
 		return nil, err
@@ -81,7 +53,7 @@ func (s *Session) GetRecentUserImages(u *User) ([]*Image, error) {
 	if resp.Status != "ok" {
 		return nil, ErrInvalidResponseStatus
 	}
-	var images []*Image
+	var images []*Media
 	for _, item := range resp.Items {
 		candidates := item.ImageVersions2.Candidates
 		if len(candidates) == 0 {
@@ -94,7 +66,7 @@ func (s *Session) GetRecentUserImages(u *User) ([]*Image, error) {
 				m = c
 			}
 		}
-		images = append(images, &Image{
+		images = append(images, &Media{
 			ID:        item.ID,
 			URL:       m.URL,
 			LikeCount: item.LikeCount,
@@ -102,36 +74,6 @@ func (s *Session) GetRecentUserImages(u *User) ([]*Image, error) {
 		})
 	}
 	return images, nil
-}
-
-func (s *Session) GetUserMediaIDS(u *User) ([]string, error) {
-	resp, err := s.insta.FirstUserFeed(u.ID)
-	if err != nil {
-		return nil, err
-	}
-	if resp.Status != "ok" {
-		return nil, ErrInvalidResponseStatus
-	}
-	var ids []string
-	for _, item := range resp.Items {
-		ids = append(ids, item.ID)
-	}
-	return ids, nil
-}
-
-func (s *Session) GetUserImage(mediaID string) (*Image, error) {
-	resp, err := s.insta.MediaInfo(mediaID)
-	if err != nil {
-		return nil, err
-	}
-	if resp.Status != "ok" {
-		return nil, ErrInvalidResponseStatus
-	}
-	m, err := s.getLargestImage(resp)
-	if err != nil {
-		return nil, err
-	}
-	return m, nil
 }
 
 func (s *Session) GetUsers() ([]*User, error) {

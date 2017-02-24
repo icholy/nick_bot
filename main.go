@@ -236,35 +236,28 @@ func fetchRandomMedia(db *sql.DB, session *instagram.Session, users []*instagram
 	user := users[rand.Intn(len(users))]
 	log.Printf("Randomly selected user: %s\n", user.Name)
 
-	// get a list of media ids for the user
-	medias, err := session.GetUserMediaIDS(user)
+	medias, err := session.GetRecentUserMedias(user)
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("Got %d media items\n", len(medias))
+	log.Printf("Got %d medias\n", len(medias))
 
 	// find an unused media id
-	var mediaID string
+	shuffleMedias(medias)
 
-	shuffle(medias)
-	for _, id := range medias {
-		ok, err := hasMediaID(db, id)
+	var media *instagram.Media
+
+	for _, m := range medias {
+		ok, err := hasMediaID(db, m.ID)
 		if err != nil {
 			return nil, err
 		}
 		if !ok {
-			mediaID = id
-			break
+			media = m
 		}
 	}
-	if mediaID == "" {
-		return nil, fmt.Errorf("all media items have already been used")
-	}
-
-	// get the url
-	media, err := session.GetUserImage(mediaID)
-	if err != nil {
-		return nil, err
+	if media == nil {
+		return nil, fmt.Errorf("no unused images for user")
 	}
 
 	// get the image
@@ -281,7 +274,7 @@ func fetchRandomMedia(db *sql.DB, session *instagram.Session, users []*instagram
 	}
 
 	return &Media{
-		ID:       mediaID,
+		ID:       media.ID,
 		URL:      media.URL,
 		UserID:   user.ID,
 		Username: user.Name,
@@ -323,6 +316,13 @@ func hasMediaID(db *sql.DB, mediaID string) (bool, error) {
 }
 
 func shuffle(slice []string) {
+	for i := range slice {
+		j := rand.Intn(i + 1)
+		slice[i], slice[j] = slice[j], slice[i]
+	}
+}
+
+func shuffleMedias(slice []*instagram.Media) {
 	for i := range slice {
 		j := rand.Intn(i + 1)
 		slice[i], slice[j] = slice[j], slice[i]
