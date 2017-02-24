@@ -61,6 +61,35 @@ func (Session) getLargestImage(info response.MediaInfoResponse) (*Image, error) 
 	}, nil
 }
 
+func (s *Session) GetRecentUserImages(u *User) ([]*Image, error) {
+	resp, err := s.insta.FirstUserFeed(u.ID)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Status != "ok" {
+		return nil, ErrInvalidResponseStatus
+	}
+	var images []*Image
+	for _, item := range resp.Items {
+		candidates := item.ImageVersions2.Candidates
+		if len(candidates) == 0 {
+			continue
+		}
+		// choose the largest version of the image
+		m := candidates[0]
+		for _, c := range candidates {
+			if c.Width*c.Height > m.Width*m.Height {
+				m = c
+			}
+		}
+		images = append(images, &Image{
+			ID:  item.ID,
+			URL: m.URL,
+		})
+	}
+	return images, nil
+}
+
 func (s *Session) GetUserMediaIDS(u *User) ([]string, error) {
 	resp, err := s.insta.FirstUserFeed(u.ID)
 	if err != nil {
