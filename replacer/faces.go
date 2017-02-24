@@ -40,7 +40,7 @@ func (fl FaceList) Random() image.Image {
 	return face
 }
 
-func loadFaces(dir string) (FaceList, error) {
+func LoadFaces(dir string) (FaceList, error) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil, err
