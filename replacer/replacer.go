@@ -22,12 +22,15 @@ var (
 	shouldDrawRectPlacement = flag.Bool("draw.rects.placement", false, "Show the placement rects")
 )
 
-func DrawFace(canvas *image.NRGBA, faceRect image.Rectangle, srcFaceImg image.Image) *image.NRGBA {
+func DrawFace(canvas *image.NRGBA, faceRect image.Rectangle) *image.NRGBA {
 	var (
 		// rect colors
 		red   = color.RGBA{255, 0, 0, 255}
 		green = color.RGBA{0, 255, 0, 255}
 		blue  = color.RGBA{0, 0, 255, 255}
+
+		// select a random source face
+		srcFaceImg = randomFace()
 
 		// add padding around detected face rect
 		paddedRect = addRectPadding(*margin, faceRect)
@@ -55,10 +58,10 @@ func DrawFace(canvas *image.NRGBA, faceRect image.Rectangle, srcFaceImg image.Im
 	return canvas
 }
 
-func DrawFaces(base image.Image, rects []image.Rectangle, faces FaceList) (*image.NRGBA, error) {
+func DrawFaces(base image.Image, rects []image.Rectangle) (*image.NRGBA, error) {
 	canvas := canvasFromImage(base)
 	for _, faceRect := range rects {
-		canvas = DrawFace(canvas, faceRect, faces.Random())
+		canvas = DrawFace(canvas, faceRect)
 	}
 	return canvas, nil
 }

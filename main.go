@@ -56,19 +56,14 @@ func testImage(imgfile string, w io.Writer) error {
 		return err
 	}
 
-	faceRects := replacer.DetectFaces(baseImage)
+	faces := replacer.DetectFaces(baseImage)
 
-	log.Printf("found %d face(s) in image\n", len(faceRects))
-	if len(faceRects) < *minfaces {
+	log.Printf("found %d face(s) in image\n", len(faces))
+	if len(faces) < *minfaces {
 		return fmt.Errorf("not enough faces")
 	}
 
-	faceImages, err := replacer.LoadFaces("faces")
-	if err != nil {
-		return err
-	}
-
-	newImage, err := replacer.DrawFaces(baseImage, faceRects, faceImages)
+	newImage, err := replacer.DrawFaces(baseImage, faces)
 	if err != nil {
 		return err
 	}
@@ -98,7 +93,7 @@ func testImageDir(dir string) error {
 	return nil
 }
 
-func attempt(db *sql.DB, faceImages replacer.FaceList, caption string) error {
+func attempt(db *sql.DB, caption string) error {
 
 	session, err := instagram.New(*username, *password)
 	if err != nil {
@@ -135,8 +130,8 @@ func attempt(db *sql.DB, faceImages replacer.FaceList, caption string) error {
 		time.Sleep(time.Second * 5)
 	}
 
-	faceRects := replacer.DetectFaces(media.Image)
-	faceCount := len(faceRects)
+	faces := replacer.DetectFaces(media.Image)
+	faceCount := len(faces)
 
 	if err := saveMedia(db, media, faceCount); err != nil {
 		return err
@@ -147,7 +142,7 @@ func attempt(db *sql.DB, faceImages replacer.FaceList, caption string) error {
 		return fmt.Errorf("not enough faces")
 	}
 
-	newImage, err := replacer.DrawFaces(media.Image, faceRects, faceImages)
+	newImage, err := replacer.DrawFaces(media.Image, faces)
 	if err != nil {
 		return err
 	}
@@ -169,6 +164,8 @@ func attempt(db *sql.DB, faceImages replacer.FaceList, caption string) error {
 
 func main() {
 	flag.Parse()
+
+	replacer.MustLoadFaces("faces")
 
 	if *testimg != "" {
 		if err := testImage(*testimg, os.Stdout); err != nil {
@@ -201,11 +198,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	faceImages, err := replacer.LoadFaces("faces")
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	for {
 
 		caption := captions[captionIndex]
@@ -215,7 +207,7 @@ func main() {
 		}
 
 		log.Println("trying to post an image")
-		if err := attempt(db, faceImages, caption); err != nil {
+		if err := attempt(db, caption); err != nil {
 			log.Printf("error: %s\n", err)
 		}
 		time.Sleep(*interval)
