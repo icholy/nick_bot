@@ -19,8 +19,8 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
+	"github.com/icholy/nick_bot/faceutil"
 	"github.com/icholy/nick_bot/instagram"
-	"github.com/icholy/nick_bot/replacer"
 )
 
 var (
@@ -56,14 +56,14 @@ func testImage(imgfile string, w io.Writer) error {
 		return err
 	}
 
-	faces := replacer.DetectFaces(baseImage)
+	faces := faceutil.DetectFaces(baseImage)
 
 	log.Printf("found %d face(s) in image\n", len(faces))
 	if len(faces) < *minfaces {
 		return fmt.Errorf("not enough faces")
 	}
 
-	newImage, err := replacer.DrawFaces(baseImage, faces)
+	newImage, err := faceutil.DrawFaces(baseImage, faces)
 	if err != nil {
 		return err
 	}
@@ -130,7 +130,7 @@ func attempt(db *sql.DB, caption string) error {
 		time.Sleep(time.Second * 5)
 	}
 
-	faces := replacer.DetectFaces(media.Image)
+	faces := faceutil.DetectFaces(media.Image)
 	faceCount := len(faces)
 
 	if err := saveMedia(db, media, faceCount); err != nil {
@@ -142,7 +142,7 @@ func attempt(db *sql.DB, caption string) error {
 		return fmt.Errorf("not enough faces")
 	}
 
-	newImage, err := replacer.DrawFaces(media.Image, faces)
+	newImage, err := faceutil.DrawFaces(media.Image, faces)
 	if err != nil {
 		return err
 	}
@@ -164,7 +164,7 @@ func attempt(db *sql.DB, caption string) error {
 func main() {
 	flag.Parse()
 
-	replacer.MustLoadFaces("faces")
+	faceutil.MustLoadFaces("faces")
 
 	if *testimg != "" {
 		if err := testImage(*testimg, os.Stdout); err != nil {
