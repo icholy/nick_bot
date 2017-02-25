@@ -66,6 +66,12 @@ func (b *Bot) Run() {
 	// stat printer
 	go func() {
 		for {
+			best, err := b.store.Search(0)
+			if err != nil {
+				log.Printf("bot: %s\n", err)
+			} else {
+				log.Printf("bot: best available: %s\n", best)
+			}
 			stats, err := b.store.Stats(model.MediaAvailable)
 			if err != nil {
 				log.Printf("bot: %s\n", err)
@@ -74,7 +80,7 @@ func (b *Bot) Run() {
 			} else {
 				log.Printf("bot: store stats:\n%s\n", stats)
 			}
-			time.Sleep(time.Second * 10)
+			time.Sleep(time.Second * 30)
 		}
 	}()
 
