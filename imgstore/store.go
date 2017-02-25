@@ -21,14 +21,21 @@ func Open(database string) (*Store, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Store{db: db}, nil
+	s := &Store{db: db}
+	if err := s.initDatabase(); err != nil {
+		db.Close()
+		return nil, err
+	}
+	return s, err
 }
 
 func (s *Store) Close() error {
 	return s.db.Close()
 }
 
-func (s *Store) CreateDatabase() error {
+func (s *Store) initDatabase() error {
+	s.m.Lock()
+	defer s.m.Unlock()
 	_, err := s.db.Exec(`
 		CREATE TABLE IF NOT EXISTS media (
 			media_id    TEXT,

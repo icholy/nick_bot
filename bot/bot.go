@@ -41,6 +41,9 @@ func NewBot(o *Options) (*Bot, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := store.CreateDatabase(); err != nil {
+		return nil, err
+	}
 	bot := &Bot{
 		opt:   o,
 		store: store,
