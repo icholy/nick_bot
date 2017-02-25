@@ -28,11 +28,15 @@ func NewCrawler(username, password string) (*Crawler, error) {
 		password: password,
 		interval: 10 * time.Minute,
 
-		out:  make(chan *UserMedia),
+		out:  make(chan *Media),
 		stop: make(chan struct{}),
 	}
 	go c.loop()
 	return c, nil
+}
+
+func (c *Crawler) Media() <-chan *Media {
+	return c.out
 }
 
 func (c *Crawler) loop() {
@@ -99,4 +103,5 @@ func (c *Crawler) getRandomUser(s *Session) (*User, error) {
 
 func (c *Crawler) Stop() {
 	close(c.stop)
+	close(c.out)
 }
