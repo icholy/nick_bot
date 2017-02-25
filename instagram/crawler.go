@@ -24,7 +24,7 @@ type Crawler struct {
 	stop chan struct{}
 }
 
-func NewCrawler(username, password string) (*Crawler, error) {
+func NewCrawler(username, password string) *Crawler {
 	c := &Crawler{
 		username: username,
 		password: password,
@@ -34,7 +34,7 @@ func NewCrawler(username, password string) (*Crawler, error) {
 		stop: make(chan struct{}),
 	}
 	go c.loop()
-	return c, nil
+	return c
 }
 
 func (c *Crawler) Media() <-chan *model.Media {

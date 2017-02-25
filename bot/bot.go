@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"fmt"
 	"log"
 	"path/filepath"
 	"time"
@@ -14,48 +15,78 @@ import (
 )
 
 type Options struct {
-	Username string
-	Password string
-	MinFaces int
-	Upload   bool
+	Username     string
+	Password     string
+	MinFaces     int
+	Upload       bool
+	PostInterval time.Duration
+	Captions     []string
 }
 
 type Bot struct {
-	opt     *Options
-	crawler *instagram.Crawler
-	store   *imgstore.Store
+	opt   *Options
+	store *imgstore.Store
+
+	captionIndex int
 }
 
 func NewBot(o *Options) (*Bot, error) {
-
 	if o.MinFaces == 0 {
 		o.MinFaces = 1
 	}
-
+	if o.PostInterval == 0 {
+		o.PostInterval = time.Hour * 24
+	}
 	store, err := imgstore.Open("media.db")
 	if err != nil {
 		return nil, err
 	}
-	crawler, err := instagram.NewCrawler(o.Username, o.Password)
-	if err != nil {
-		return nil, err
-	}
 	bot := &Bot{
-		opt:     o,
-		crawler: crawler,
-		store:   store,
+		opt:   o,
+		store: store,
 	}
-	go bot.start()
+	bot.start()
 	return bot, nil
 }
 
-func (b *Bot) start() {
-	for media := range b.crawler.Media() {
-		if err := b.handleMedia(media); err != nil {
-			log.Printf("error: %s\n", err)
-		}
-		time.Sleep(time.Second * 10)
+func (b *Bot) getCaption(rec *model.Record) string {
+	credit := fmt.Sprint("photocred goes to: @%s", rec.Username)
+	captions := b.opt.Captions
+	if len(captions) == 0 {
+		return credit
 	}
+	caption := captions[b.captionIndex]
+	b.captionIndex++
+	if b.captionIndex >= len(captions) {
+		b.captionIndex = 0
+	}
+	return fmt.Sprintf("%s\n\n%s", caption, credit)
+}
+
+func (b *Bot) start() {
+
+	// posting loop
+	go func() {
+		for {
+			log.Println("bot: trying to post")
+			if err := b.post(); err != nil {
+				log.Printf("bot: %s\n", err)
+			}
+			log.Printf("bot: sleeping for %s\n", b.opt.PostInterval)
+			time.Sleep(b.opt.PostInterval)
+		}
+	}()
+
+	// crawler loop
+	go func() {
+		crawler := instagram.NewCrawler(b.opt.Username, b.opt.Password)
+		for media := range crawler.Media() {
+			if err := b.handleMedia(media); err != nil {
+				log.Printf("bot: %s\n", err)
+			}
+			time.Sleep(time.Second * 10)
+		}
+	}()
 }
 
 func (b *Bot) handleMedia(m *model.Media) error {
@@ -90,7 +121,17 @@ func (b *Bot) post() error {
 	if err != nil {
 		return err
 	}
-	log.Printf("bot: using %s\n", rec)
+	log.Printf("bot: posting %s\n", rec)
+
+	if err := b.postRecord(rec); err != nil {
+		log.Println("bot: %s", err)
+		return b.store.SetState(rec.ID, model.MediaRejected)
+	} else {
+		return b.store.SetState(rec.ID, model.MediaUsed)
+	}
+}
+
+func (b *Bot) postRecord(rec *model.Record) error {
 
 	// download image
 	img, err := fetchImage(rec.URL)
@@ -112,19 +153,17 @@ func (b *Bot) post() error {
 		return err
 	}
 
-	// upload photo
-	if b.opt.Upload {
-		log.Println("bot: uploading photo")
-		session, err := instagram.NewSession(b.opt.Username, b.opt.Password)
-		if err != nil {
-			return err
-		}
-		defer session.Close()
-		if err := session.UploadPhoto(imgpath, ""); err != nil {
-			return err
-		}
+	if !b.opt.Upload {
+		return nil
 	}
 
-	// update record state
-	return b.store.SetState(rec.ID, model.MediaUsed)
+	// upload photo
+	log.Println("bot: uploading photo")
+	session, err := instagram.NewSession(b.opt.Username, b.opt.Password)
+	if err != nil {
+		return err
+	}
+	defer session.Close()
+	caption := b.getCaption(rec)
+	return session.UploadPhoto(imgpath, caption)
 }
