@@ -1,4 +1,4 @@
-package bot
+package facebot
 
 import (
 	"fmt"
@@ -30,7 +30,7 @@ type Bot struct {
 	captionIndex int
 }
 
-func NewBot(o *Options) (*Bot, error) {
+func New(o *Options) (*Bot, error) {
 	if o.MinFaces == 0 {
 		o.MinFaces = 1
 	}
@@ -41,15 +41,10 @@ func NewBot(o *Options) (*Bot, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := store.CreateDatabase(); err != nil {
-		return nil, err
-	}
-	bot := &Bot{
+	return &Bot{
 		opt:   o,
 		store: store,
-	}
-	bot.start()
-	return bot, nil
+	}, nil
 }
 
 func (b *Bot) getCaption(rec *model.Record) string {
@@ -66,19 +61,7 @@ func (b *Bot) getCaption(rec *model.Record) string {
 	return fmt.Sprintf("%s\n\n%s", caption, credit)
 }
 
-func (b *Bot) start() {
-
-	// posting loop
-	go func() {
-		for {
-			log.Println("bot: trying to post")
-			if err := b.post(); err != nil {
-				log.Printf("bot: %s\n", err)
-			}
-			log.Printf("bot: sleeping for %s\n", b.opt.PostInterval)
-			time.Sleep(b.opt.PostInterval)
-		}
-	}()
+func (b *Bot) Run() {
 
 	// crawler loop
 	go func() {
@@ -90,6 +73,16 @@ func (b *Bot) start() {
 			time.Sleep(time.Second * 10)
 		}
 	}()
+
+	// posting loop
+	for {
+		log.Println("bot: trying to post")
+		if err := b.post(); err != nil {
+			log.Printf("bot: %s\n", err)
+		}
+		log.Printf("bot: sleeping for %s\n", b.opt.PostInterval)
+		time.Sleep(b.opt.PostInterval)
+	}
 }
 
 func (b *Bot) handleMedia(m *model.Media) error {

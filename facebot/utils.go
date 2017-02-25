@@ -1,4 +1,4 @@
-package bot
+package facebot
 
 import (
 	"image"

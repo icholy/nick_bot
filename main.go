@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"database/sql"
 	"flag"
 	"fmt"
 	"image"
@@ -12,16 +11,14 @@ import (
 	"io/ioutil"
 	"log"
 	"math/rand"
-	"net/http"
 	"os"
 	"path/filepath"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 
+	"github.com/icholy/nick_bot/facebot"
 	"github.com/icholy/nick_bot/faceutil"
-	"github.com/icholy/nick_bot/instagram"
-	"github.com/icholy/nick_bot/model"
 )
 
 var (
@@ -33,18 +30,6 @@ var (
 	testimg  = flag.String("test.image", "", "test image")
 	testdir  = flag.String("test.dir", "", "test a directory of images")
 )
-
-type Media struct {
-	ID       string
-	URL      string
-	UserID   string
-	Username string
-	Image    image.Image
-}
-
-func (m *Media) String() string {
-	return fmt.Sprintf("%s: %s", m.Username, m.URL)
-}
 
 func testImage(imgfile string, w io.Writer) error {
 	f, err := os.Open(imgfile)
@@ -94,74 +79,6 @@ func testImageDir(dir string) error {
 	return nil
 }
 
-func attempt(db *sql.DB, caption string) error {
-
-	session, err := instagram.NewSession(*username, *password)
-	if err != nil {
-		return err
-	}
-	defer session.Close()
-
-	// get a list of users
-	users, err := session.GetUsers()
-	if err != nil {
-		return err
-	}
-	if len(users) == 0 {
-		return fmt.Errorf("no users found")
-	}
-	log.Printf("found %d users\n", len(users))
-
-	var media *Media
-
-	for i := 0; true; i++ {
-
-		if i > 10 {
-			return fmt.Errorf("too many failed attempts")
-		}
-
-		log.Printf("fetch attempt %d\n", i+1)
-		media, err = fetchRandomMedia(db, session, users)
-		if err == nil {
-			break
-		}
-
-		log.Printf("error fetching media: %s\n", err)
-		log.Println("trying again in 5 seconds\n")
-		time.Sleep(time.Second * 5)
-	}
-
-	faces := faceutil.DetectFaces(media.Image)
-	faceCount := len(faces)
-
-	if err := saveMedia(db, media, faceCount); err != nil {
-		return err
-	}
-
-	log.Printf("found %d face(s) in image\n", faceCount)
-	if faceCount < *minfaces {
-		return fmt.Errorf("not enough faces")
-	}
-
-	newImage, err := faceutil.DrawFaces(media.Image, faces)
-	if err != nil {
-		return err
-	}
-
-	outpath := filepath.Join("output", media.ID+"_nick.jpeg")
-	log.Printf("writing to %s\n", outpath)
-	if err := writeImage(outpath, newImage); err != nil {
-		return err
-	}
-
-	if *upload {
-		caption := fmt.Sprintf("%s\n\nphotocred goes to: @%s", caption, media.Username)
-		return session.UploadPhoto(outpath, caption)
-	}
-
-	return nil
-}
-
 func main() {
 	flag.Parse()
 
@@ -181,132 +98,23 @@ func main() {
 		return
 	}
 
-	captionIndex := 0
 	captions, err := readCaptions("captions.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
 	shuffle(captions)
 
-	db, err := sql.Open("sqlite3", "media.db")
+	bot, err := facebot.New(&facebot.Options{
+		Username:     *username,
+		Password:     *password,
+		MinFaces:     *minfaces,
+		PostInterval: *interval,
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
-	if err := createDatabase(db); err != nil {
-		log.Fatal(err)
-	}
-
-	for {
-
-		caption := captions[captionIndex]
-		captionIndex++
-		if captionIndex >= len(captions) {
-			captionIndex = 0
-		}
-
-		log.Println("trying to post an image")
-		if err := attempt(db, caption); err != nil {
-			log.Printf("error: %s\n", err)
-		}
-		time.Sleep(*interval)
-	}
-
-}
-
-func writeImage(filename string, img image.Image) error {
-	f, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	return jpeg.Encode(f, img, &jpeg.Options{jpeg.DefaultQuality})
-}
-
-func fetchRandomMedia(db *sql.DB, session *instagram.Session, users []*model.User) (*Media, error) {
-
-	// select a random user
-	user := users[rand.Intn(len(users))]
-	log.Printf("Randomly selected user: %s\n", user.Name)
-
-	medias, err := session.GetRecentUserMedias(user)
-	if err != nil {
-		return nil, err
-	}
-	log.Printf("Got %d medias\n", len(medias))
-
-	// find unused medias
-	var unused []*model.Media
-	for _, media := range medias {
-		ok, err := hasMediaID(db, media.ID)
-		if err != nil {
-			return nil, err
-		}
-		if !ok {
-			unused = append(unused, media)
-		}
-	}
-	if len(unused) == 0 {
-		return nil, fmt.Errorf("no unused images for user")
-	}
-
-	// select a random media
-	media := unused[rand.Intn(len(unused))]
-
-	// get the image
-	resp, err := http.Get(media.URL)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	// decode the image
-	img, _, err := image.Decode(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Media{
-		ID:       media.ID,
-		URL:      media.URL,
-		UserID:   user.ID,
-		Username: user.Name,
-		Image:    img,
-	}, nil
-}
-
-func createDatabase(db *sql.DB) error {
-	_, err := db.Exec(`
-		CREATE TABLE IF NOT EXISTS media (
-			user_id,
-			user_name,
-			media_id,
-			media_url,
-			face_count
-		)
-	`)
-	return err
-}
-
-func saveMedia(db *sql.DB, media *Media, facecount int) error {
-	log.Printf("Saving: %s\n", media)
-	_, err := db.Exec(
-		`INSERT INTO media VALUES (?, ?, ?, ?, ?)`,
-		media.UserID, media.Username, media.ID, media.URL, facecount,
-	)
-	return err
-}
-
-func hasMediaID(db *sql.DB, mediaID string) (bool, error) {
-	var count int
-	if err := db.QueryRow(
-		`SELECT COUNT(1) FROM media WHERE media_id = ? LIMIT 1`,
-		mediaID,
-	).Scan(&count); err != nil {
-		return false, err
-	}
-	return count == 1, nil
+	bot.Run()
 }
 
 func shuffle(slice []string) {
