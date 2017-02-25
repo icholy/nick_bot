@@ -38,3 +38,12 @@ type Record struct {
 	FaceCount int
 	State     MediaState
 }
+
+func (rec *Record) String() string {
+	return fmt.Sprintf("Record: [%d likes] [%d faces] @%s %s",
+		rec.LikeCount,
+		rec.FaceCount,
+		rec.Username,
+		rec.URL,
+	)
+}

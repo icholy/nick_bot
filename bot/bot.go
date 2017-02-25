@@ -27,6 +27,11 @@ type Options struct {
 }
 
 func NewBot(o *Options) (*Bot, error) {
+
+	if o.MinFaces == 0 {
+		o.MinFaces = 1
+	}
+
 	store, err := imgstore.Open("media.db")
 	if err != nil {
 		return nil, err
@@ -83,13 +88,14 @@ func (b *Bot) handleMedia(m *model.Media) error {
 	})
 }
 
-func (b *Bot) postImage() error {
+func (b *Bot) post() error {
 
 	// find the best image
 	rec, err := b.store.Search(b.opt.MinFaces)
 	if err != nil {
 		return err
 	}
+	log.Printf("bot: using %s\n", rec)
 
 	// download image
 	img, err := fetchImage(rec.URL)
@@ -97,10 +103,8 @@ func (b *Bot) postImage() error {
 		return err
 	}
 
-	// find the faces
-	faces := faceutil.DetectFaces(img)
-
 	// replace the faces
+	faces := faceutil.DetectFaces(img)
 	newImage, err := faceutil.DrawFaces(img, faces)
 	if err != nil {
 		return err
@@ -108,20 +112,19 @@ func (b *Bot) postImage() error {
 
 	// save image
 	imgpath := filepath.Join("output", rec.ID+".jpeg")
-	log.Printf("writing to %s\n", imgpath)
+	log.Printf("bot: writing image %s\n", imgpath)
 	if err := writeImage(imgpath, newImage); err != nil {
 		return err
 	}
 
-	// login to instagram
-	session, err := instagram.NewSession(b.opt.Username, b.opt.Password)
-	if err != nil {
-		return err
-	}
-	defer session.Close()
-
 	// upload photo
 	if b.opt.Upload {
+		log.Println("bot: uploading photo")
+		session, err := instagram.NewSession(b.opt.Username, b.opt.Password)
+		if err != nil {
+			return err
+		}
+		defer session.Close()
 		if err := session.UploadPhoto(imgpath, ""); err != nil {
 			return err
 		}
