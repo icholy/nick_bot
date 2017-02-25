@@ -123,6 +123,7 @@ func (b *Bot) post() error {
 	}
 	log.Printf("bot: posting %s\n", rec)
 
+	// try to post it
 	if err := b.postRecord(rec); err != nil {
 		log.Println("bot: %s", err)
 		return b.store.SetState(rec.ID, model.MediaRejected)
