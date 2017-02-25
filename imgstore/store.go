@@ -3,6 +3,7 @@ package imgstore
 import (
 	"database/sql"
 	"fmt"
+	"sync"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -12,6 +13,7 @@ import (
 
 type Store struct {
 	db *sql.DB
+	m  sync.Mutex
 }
 
 func Open(database string) (*Store, error) {
@@ -19,7 +21,7 @@ func Open(database string) (*Store, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Store{db}, nil
+	return &Store{db: db}, nil
 }
 
 func (s *Store) Close() error {
@@ -43,6 +45,8 @@ func (s *Store) CreateDatabase() error {
 }
 
 func (s *Store) Put(rec *model.Record) error {
+	s.m.Lock()
+	defer s.m.Unlock()
 	_, err := s.db.Exec(
 		`INSERT INTO media VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		rec.ID,
@@ -58,6 +62,8 @@ func (s *Store) Put(rec *model.Record) error {
 }
 
 func (s *Store) Get(id string) (*model.Record, error) {
+	s.m.Lock()
+	defer s.m.Unlock()
 	row := s.db.QueryRow(
 		`SELECT * FROM media WHERE media_id = ? LIMIT 1`, id,
 	)
@@ -65,6 +71,8 @@ func (s *Store) Get(id string) (*model.Record, error) {
 }
 
 func (s *Store) Has(id string) (bool, error) {
+	s.m.Lock()
+	defer s.m.Unlock()
 	var count int
 	if err := s.db.QueryRow(
 		`SELECT COUNT(1) FROM media WHERE media_id = ? LIMIT 1`, id,
@@ -75,6 +83,8 @@ func (s *Store) Has(id string) (bool, error) {
 }
 
 func (s *Store) SetState(id string, state model.MediaState) error {
+	s.m.Lock()
+	defer s.m.Unlock()
 	resp, err := s.db.Exec(
 		`UPDATE media SET state = ? WHERE media_id = ? LIMIT 1`,
 		state, id,
@@ -93,6 +103,8 @@ func (s *Store) SetState(id string, state model.MediaState) error {
 }
 
 func (s *Store) Search(minFaces int) (*model.Record, error) {
+	s.m.Lock()
+	defer s.m.Unlock()
 	row := s.db.QueryRow(`
 		SELECT *
 		FROM media
