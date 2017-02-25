@@ -81,33 +81,6 @@ func (s *Session) GetRecentUserMedias(u *User) ([]*Media, error) {
 	return images, nil
 }
 
-func (s *Session) GetMedia(mediaID string) (*Media, error) {
-	resp, err := s.insta.MediaInfo(mediaID)
-	if err != nil {
-		return nil, err
-	}
-	if resp.Status != "ok" {
-		return nil, ErrInvalidResponseStatus
-	}
-	if len(resp.Items) == 0 {
-		return nil, fmt.Errorf("no media items found")
-	}
-	var (
-		item       = resp.Items[0]
-		candidates = item.ImageVersions2.Candidates
-	)
-	if len(candidates) == 0 {
-		return nil, fmt.Errorf("no media candidates found")
-	}
-	m := s.getLargestCandidate(candidates)
-	return &Media{
-		ID:        item.ID,
-		URL:       m.URL,
-		LikeCount: item.LikeCount,
-		PostedAt:  time.Unix(int64(item.Caption.CreatedAt), 0),
-	}, nil
-}
-
 func (s *Session) GetUsers() ([]*User, error) {
 	id := s.insta.LoggedInUser.StringID()
 	resp, err := s.insta.UserFollowing(id, "")
