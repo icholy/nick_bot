@@ -18,6 +18,8 @@ type User struct {
 type Media struct {
 	ID        string
 	URL       string
+	UserID    string
+	Username  string
 	LikeCount int
 	PostedAt  time.Time
 }
@@ -74,6 +76,8 @@ func (s *Session) GetRecentUserMedias(u *User) ([]*Media, error) {
 		images = append(images, &Media{
 			ID:        item.ID,
 			URL:       m.URL,
+			UserID:    u.ID,
+			Username:  u.Name,
 			LikeCount: item.LikeCount,
 			PostedAt:  time.Unix(int64(item.Caption.CreatedAt), 0),
 		})
