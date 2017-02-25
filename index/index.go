@@ -91,7 +91,7 @@ func (mi *Index) Has(id string) (bool, error) {
 	return count == 1, nil
 }
 
-func (mi *Index) Mark(id string, state MediaState) error {
+func (mi *Index) SetState(id string, state MediaState) error {
 	resp, err := mi.db.Exec(
 		`UPDATE media SET state = ? WHERE media_id = ? LIMIT 1`,
 		state, id,
