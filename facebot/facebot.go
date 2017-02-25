@@ -66,20 +66,7 @@ func (b *Bot) Run() {
 	// stat printer
 	go func() {
 		for {
-			best, err := b.store.Search(0)
-			if err != nil {
-				log.Printf("bot: %s\n", err)
-			} else {
-				log.Printf("bot: best available: %s\n", best)
-			}
-			stats, err := b.store.Stats(model.MediaAvailable)
-			if err != nil {
-				log.Printf("bot: %s\n", err)
-			} else if len(stats) == 0 {
-				log.Println("bot: store stats: no data")
-			} else {
-				log.Printf("bot: store stats:\n%s\n", stats)
-			}
+			b.printStats()
 			time.Sleep(time.Second * 30)
 		}
 	}()
@@ -185,4 +172,21 @@ func (b *Bot) postRecord(rec *model.Record) error {
 	defer session.Close()
 	caption := b.getCaption(rec)
 	return session.UploadPhoto(imgpath, caption)
+}
+
+func (b *Bot) printStats() {
+	best, err := b.store.Search(0)
+	if err != nil {
+		log.Printf("bot: %s\n", err)
+	} else {
+		log.Printf("bot: best available: %s\n", best)
+	}
+	stats, err := b.store.Stats(model.MediaAvailable)
+	if err != nil {
+		log.Printf("bot: %s\n", err)
+	} else if len(stats) == 0 {
+		log.Println("bot: store stats: no data")
+	} else {
+		log.Printf("bot: store stats:\n%s\n", stats)
+	}
 }
