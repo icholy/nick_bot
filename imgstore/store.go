@@ -59,13 +59,13 @@ func (s *Store) initDatabase() error {
 	_, err := s.db.Exec(`
 		CREATE TABLE IF NOT EXISTS media (
 			media_id    TEXT,
-			media_url,  TEXT,
+			media_url   TEXT,
 			user_id     TEXT,
 			user_name   TEXT,
 			like_count  INTEGER,
 			face_count  INTEGER,
-			posted_at  INTEGER,
-			state      INTEGER
+			posted_at   INTEGER,
+			state       INTEGER
 		)
 	`)
 	return err
