@@ -50,7 +50,7 @@ func (c *Crawler) loop() {
 			case err == ErrStop:
 				return
 			case err != nil:
-				log.Printf("error: %s\n", err)
+				log.Printf("crawler: %s\n", err)
 			}
 		case <-c.stop:
 			return

@@ -13,17 +13,17 @@ import (
 	"github.com/icholy/nick_bot/model"
 )
 
-type Bot struct {
-	opt     *Options
-	crawler *instagram.Crawler
-	store   *imgstore.Store
-}
-
 type Options struct {
 	Username string
 	Password string
 	MinFaces int
 	Upload   bool
+}
+
+type Bot struct {
+	opt     *Options
+	crawler *instagram.Crawler
+	store   *imgstore.Store
 }
 
 func NewBot(o *Options) (*Bot, error) {
@@ -47,11 +47,6 @@ func NewBot(o *Options) (*Bot, error) {
 	}
 	go bot.start()
 	return bot, nil
-}
-
-func (b *Bot) Stop() error {
-	b.crawler.Stop()
-	return b.store.Close()
 }
 
 func (b *Bot) start() {
