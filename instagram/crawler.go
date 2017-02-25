@@ -10,11 +10,6 @@ import (
 
 var ErrStop = errors.New("stop crawler")
 
-type UserMedia struct {
-	User
-	Media
-}
-
 type Crawler struct {
 	username string
 	password string
@@ -23,7 +18,7 @@ type Crawler struct {
 	usersCache   []*User
 	usersUpdated time.Time
 
-	out  chan *UserMedia
+	out  chan *Media
 	stop chan struct{}
 }
 
@@ -73,7 +68,7 @@ func (c *Crawler) crawl() error {
 	}
 	for _, media := range medias {
 		select {
-		case c.out <- &UserMedia{*user, *media}:
+		case c.out <- media:
 			return nil
 		case <-c.stop:
 			return ErrStop
