@@ -1,10 +1,7 @@
 package bot
 
 import (
-	"image"
-	_ "image/png"
 	"log"
-	"net/http"
 	"path/filepath"
 	"time"
 
@@ -69,11 +66,14 @@ func (b *Bot) handleMedia(m *model.Media) error {
 		return err
 	}
 
-	// download image and do face detection
-	_, faces, err := fetchAndDetect(m.URL)
+	// download image
+	img, err := fetchImage(m.URL)
 	if err != nil {
 		return err
 	}
+
+	// find the faces
+	faces := faceutil.DetectFaces(img)
 
 	// write to store
 	return b.store.Put(&model.Record{
@@ -91,11 +91,14 @@ func (b *Bot) postImage() error {
 		return err
 	}
 
-	// download image and do face detection
-	img, faces, err := fetchAndDetect(rec.URL)
+	// download image
+	img, err := fetchImage(rec.URL)
 	if err != nil {
 		return err
 	}
+
+	// find the faces
+	faces := faceutil.DetectFaces(img)
 
 	// replace the faces
 	newImage, err := faceutil.DrawFaces(img, faces)
@@ -126,18 +129,4 @@ func (b *Bot) postImage() error {
 
 	// update record state
 	return b.store.SetState(rec.ID, model.MediaUsed)
-}
-
-func fetchAndDetect(url string) (image.Image, []image.Rectangle, error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, nil, err
-	}
-	defer resp.Body.Close()
-	img, _, err := image.Decode(resp.Body)
-	if err != nil {
-		return nil, nil, err
-	}
-	faces := faceutil.DetectFaces(img)
-	return img, faces, nil
 }
