@@ -21,6 +21,7 @@ import (
 
 	"github.com/icholy/nick_bot/faceutil"
 	"github.com/icholy/nick_bot/instagram"
+	"github.com/icholy/nick_bot/model"
 )
 
 var (
@@ -223,7 +224,7 @@ func writeImage(filename string, img image.Image) error {
 	return jpeg.Encode(f, img, &jpeg.Options{jpeg.DefaultQuality})
 }
 
-func fetchRandomMedia(db *sql.DB, session *instagram.Session, users []*instagram.User) (*Media, error) {
+func fetchRandomMedia(db *sql.DB, session *instagram.Session, users []*model.User) (*Media, error) {
 
 	// select a random user
 	user := users[rand.Intn(len(users))]
@@ -236,7 +237,7 @@ func fetchRandomMedia(db *sql.DB, session *instagram.Session, users []*instagram
 	log.Printf("Got %d medias\n", len(medias))
 
 	// find unused medias
-	var unused []*instagram.Media
+	var unused []*model.Media
 	for _, media := range medias {
 		ok, err := hasMediaID(db, media.ID)
 		if err != nil {

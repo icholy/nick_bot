@@ -6,6 +6,8 @@ import (
 	"log"
 	"math/rand"
 	"time"
+
+	"github.com/icholy/nick_bot/model"
 )
 
 var ErrStop = errors.New("stop crawler")
@@ -15,10 +17,10 @@ type Crawler struct {
 	password string
 	interval time.Duration
 
-	usersCache   []*User
+	usersCache   []*model.User
 	usersUpdated time.Time
 
-	out  chan *Media
+	out  chan *model.Media
 	stop chan struct{}
 }
 
@@ -28,14 +30,14 @@ func NewCrawler(username, password string) (*Crawler, error) {
 		password: password,
 		interval: 10 * time.Minute,
 
-		out:  make(chan *Media),
+		out:  make(chan *model.Media),
 		stop: make(chan struct{}),
 	}
 	go c.loop()
 	return c, nil
 }
 
-func (c *Crawler) Media() <-chan *Media {
+func (c *Crawler) Media() <-chan *model.Media {
 	return c.out
 }
 
@@ -81,7 +83,7 @@ func (c *Crawler) crawl() error {
 	return nil
 }
 
-func (c *Crawler) getRandomUser(s *Session) (*User, error) {
+func (c *Crawler) getRandomUser(s *Session) (*model.User, error) {
 
 	// update the user cache if it's been over an hour
 	if c.usersUpdated.IsZero() || time.Since(c.usersUpdated) > time.Hour {

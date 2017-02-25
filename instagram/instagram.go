@@ -2,33 +2,15 @@ package instagram
 
 import (
 	"errors"
-	"fmt"
+	"time"
+
 	"github.com/ahmdrz/goinsta"
 	"github.com/ahmdrz/goinsta/response"
-	"time"
+
+	"github.com/icholy/nick_bot/model"
 )
 
 var ErrInvalidResponseStatus = errors.New("instagram: invalid response status")
-
-type User struct {
-	ID   string
-	Name string
-}
-
-type Media struct {
-	ID        string
-	URL       string
-	UserID    string
-	Username  string
-	LikeCount int
-	PostedAt  time.Time
-}
-
-func (m *Media) String() string {
-	return fmt.Sprintf("Media: [%d likes] @%s %s",
-		m.LikeCount, m.PostedAt, m.URL,
-	)
-}
 
 type Session struct {
 	insta *goinsta.Instagram
@@ -58,7 +40,7 @@ func (Session) getLargestCandidate(candidates []response.ImageCandidate) respons
 	return m
 }
 
-func (s *Session) GetRecentUserMedias(u *User) ([]*Media, error) {
+func (s *Session) GetRecentUserMedias(u *model.User) ([]*model.Media, error) {
 	resp, err := s.insta.FirstUserFeed(u.ID)
 	if err != nil {
 		return nil, err
@@ -66,14 +48,14 @@ func (s *Session) GetRecentUserMedias(u *User) ([]*Media, error) {
 	if resp.Status != "ok" {
 		return nil, ErrInvalidResponseStatus
 	}
-	var images []*Media
+	var images []*model.Media
 	for _, item := range resp.Items {
 		candidates := item.ImageVersions2.Candidates
 		if len(candidates) == 0 {
 			continue
 		}
 		m := s.getLargestCandidate(item.ImageVersions2.Candidates)
-		images = append(images, &Media{
+		images = append(images, &model.Media{
 			ID:        item.ID,
 			URL:       m.URL,
 			UserID:    u.ID,
@@ -85,7 +67,7 @@ func (s *Session) GetRecentUserMedias(u *User) ([]*Media, error) {
 	return images, nil
 }
 
-func (s *Session) GetUsers() ([]*User, error) {
+func (s *Session) GetUsers() ([]*model.User, error) {
 	id := s.insta.LoggedInUser.StringID()
 	resp, err := s.insta.UserFollowing(id, "")
 	if err != nil {
@@ -94,9 +76,9 @@ func (s *Session) GetUsers() ([]*User, error) {
 	if resp.Status != "ok" {
 		return nil, ErrInvalidResponseStatus
 	}
-	var users []*User
+	var users []*model.User
 	for _, u := range resp.Users {
-		users = append(users, &User{
+		users = append(users, &model.User{
 			ID:   u.StringID(),
 			Name: u.Username,
 		})
