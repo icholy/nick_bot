@@ -1,4 +1,4 @@
-package index
+package imgstore
 
 import (
 	"database/sql"
@@ -10,24 +10,24 @@ import (
 	"github.com/icholy/nick_bot/model"
 )
 
-type Index struct {
+type Store struct {
 	db *sql.DB
 }
 
-func Open(database string) (*Index, error) {
+func Open(database string) (*Store, error) {
 	db, err := sql.Open("sqlite3", database)
 	if err != nil {
 		return nil, err
 	}
-	return &Index{db}, nil
+	return &Store{db}, nil
 }
 
-func (mi *Index) Close() error {
-	return mi.db.Close()
+func (s *Store) Close() error {
+	return s.db.Close()
 }
 
-func (mi *Index) CreateDatabase() error {
-	_, err := mi.db.Exec(`
+func (s *Store) CreateDatabase() error {
+	_, err := s.db.Exec(`
 		CREATE TABLE IF NOT EXISTS media (
 			media_id    TEXT,
 			media_url,  TEXT,
@@ -42,8 +42,8 @@ func (mi *Index) CreateDatabase() error {
 	return err
 }
 
-func (mi *Index) Put(rec *model.Record) error {
-	_, err := mi.db.Exec(
+func (s *Store) Put(rec *model.Record) error {
+	_, err := s.db.Exec(
 		`INSERT INTO media VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		rec.ID,
 		rec.URL,
@@ -57,16 +57,16 @@ func (mi *Index) Put(rec *model.Record) error {
 	return err
 }
 
-func (mi *Index) Get(id string) (*model.Record, error) {
-	row := mi.db.QueryRow(
+func (s *Store) Get(id string) (*model.Record, error) {
+	row := s.db.QueryRow(
 		`SELECT * FROM media WHERE media_id = ? LIMIT 1`, id,
 	)
 	return scanRecord(row)
 }
 
-func (mi *Index) Has(id string) (bool, error) {
+func (s *Store) Has(id string) (bool, error) {
 	var count int
-	if err := mi.db.QueryRow(
+	if err := s.db.QueryRow(
 		`SELECT COUNT(1) FROM media WHERE media_id = ? LIMIT 1`, id,
 	).Scan(&count); err != nil {
 		return false, err
@@ -74,8 +74,8 @@ func (mi *Index) Has(id string) (bool, error) {
 	return count == 1, nil
 }
 
-func (mi *Index) SetState(id string, state model.MediaState) error {
-	resp, err := mi.db.Exec(
+func (s *Store) SetState(id string, state model.MediaState) error {
+	resp, err := s.db.Exec(
 		`UPDATE media SET state = ? WHERE media_id = ? LIMIT 1`,
 		state, id,
 	)
@@ -92,8 +92,8 @@ func (mi *Index) SetState(id string, state model.MediaState) error {
 	return nil
 }
 
-func (mi *Index) Search(minFaces int) (*model.Record, error) {
-	row := mi.db.QueryRow(`
+func (s *Store) Search(minFaces int) (*model.Record, error) {
+	row := s.db.QueryRow(`
 		SELECT *
 		FROM media
 		WHERE state == ? AND face_count >= ?
