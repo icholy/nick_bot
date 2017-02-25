@@ -47,9 +47,7 @@ func (c *Crawler) loop() {
 			err := c.crawl()
 			switch {
 			case err == ErrStop:
-			case err == nil:
-				return
-			default:
+			case err != nil:
 				log.Printf("error: %s\n", err)
 			}
 		case <-c.stop:
