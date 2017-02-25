@@ -1,7 +1,6 @@
 package instagram
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -9,8 +8,6 @@ import (
 
 	"github.com/icholy/nick_bot/model"
 )
-
-var ErrStop = errors.New("stop crawler")
 
 type Crawler struct {
 	username string
@@ -43,18 +40,10 @@ func (c *Crawler) Media() <-chan *model.Media {
 
 func (c *Crawler) loop() {
 	for {
-		select {
-		case <-time.After(c.interval):
-			err := c.crawl()
-			switch {
-			case err == ErrStop:
-				return
-			case err != nil:
-				log.Printf("crawler: %s\n", err)
-			}
-		case <-c.stop:
-			return
+		if err := c.crawl(); err != nil {
+			log.Printf("crawler: %s\n", err)
 		}
+		time.Sleep(c.interval)
 	}
 }
 
@@ -73,12 +62,7 @@ func (c *Crawler) crawl() error {
 		return err
 	}
 	for _, media := range medias {
-		select {
-		case c.out <- media:
-			return nil
-		case <-c.stop:
-			return ErrStop
-		}
+		c.out <- media
 	}
 	return nil
 }
@@ -102,9 +86,4 @@ func (c *Crawler) getRandomUser(s *Session) (*model.User, error) {
 	}
 	index := rand.Intn(len(c.usersCache))
 	return c.usersCache[index], nil
-}
-
-func (c *Crawler) Stop() {
-	close(c.stop)
-	close(c.out)
 }
