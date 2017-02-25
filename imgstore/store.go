@@ -3,6 +3,7 @@ package imgstore
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -14,6 +15,25 @@ import (
 type Store struct {
 	db *sql.DB
 	m  sync.Mutex
+}
+
+type Stat struct {
+	Faces int
+	Count int64
+}
+
+func (s *Stat) String() string {
+	return fmt.Sprintf("%d: %d face(s)", s.Count, s.Faces)
+}
+
+type Stats []Stat
+
+func (s Stats) String() string {
+	var ss []string
+	for _, s := range s {
+		ss = append(ss, s.String())
+	}
+	return strings.Join(ss, "\n")
 }
 
 func Open(database string) (*Store, error) {
@@ -45,7 +65,7 @@ func (s *Store) initDatabase() error {
 			like_count  INTEGER,
 			face_count  INTEGER,
 			posted_at  INTEGER,
-			media_state INTEGER
+			state      INTEGER
 		)
 	`)
 	return err
@@ -120,6 +140,33 @@ func (s *Store) Search(minFaces int) (*model.Record, error) {
 		LIMIT 1
 	`, model.MediaAvailable, minFaces)
 	return scanRecord(row)
+}
+
+func (s *Store) Stats(state model.MediaState) (Stats, error) {
+	s.m.Lock()
+	defer s.m.Unlock()
+	rows, err := s.db.Query(`
+		SELECT COUNT(1), face_count
+		FROM media
+		WHERE state = ?
+		GROUP BY face_count
+	`, state)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var stats Stats
+	for rows.Next() {
+		var s Stat
+		if err := rows.Scan(&s.Count, &s.Faces); err != nil {
+			return nil, err
+		}
+		stats = append(stats, s)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return stats, nil
 }
 
 func scanRecord(row *sql.Row) (*model.Record, error) {

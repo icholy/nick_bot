@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"flag"
-	"fmt"
 	"image"
 	"image/jpeg"
 	_ "image/png"
@@ -43,11 +42,7 @@ func testImage(imgfile string, w io.Writer) error {
 	}
 
 	faces := faceutil.DetectFaces(baseImage)
-
 	log.Printf("found %d face(s) in image\n", len(faces))
-	if len(faces) < *minfaces {
-		return fmt.Errorf("not enough faces")
-	}
 
 	newImage, err := faceutil.DrawFaces(baseImage, faces)
 	if err != nil {
@@ -109,11 +104,12 @@ func main() {
 		Password:     *password,
 		MinFaces:     *minfaces,
 		PostInterval: *interval,
+		Upload:       *upload,
+		Captions:     captions,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	bot.Run()
 }
 

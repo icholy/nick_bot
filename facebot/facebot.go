@@ -63,10 +63,26 @@ func (b *Bot) getCaption(rec *model.Record) string {
 
 func (b *Bot) Run() {
 
+	// stat printer
+	go func() {
+		for {
+			stats, err := b.store.Stats(model.MediaAvailable)
+			if err != nil {
+				log.Printf("bot: %s\n", err)
+			} else if len(stats) == 0 {
+				log.Println("bot: store stats: no data")
+			} else {
+				log.Printf("bot: store stats:\n%s\n", stats)
+			}
+			time.Sleep(time.Second * 10)
+		}
+	}()
+
 	// crawler loop
 	go func() {
 		crawler := instagram.NewCrawler(b.opt.Username, b.opt.Password)
 		for media := range crawler.Media() {
+			log.Printf("bot: crawler found: %s\n", media)
 			if err := b.handleMedia(media); err != nil {
 				log.Printf("bot: %s\n", err)
 			}

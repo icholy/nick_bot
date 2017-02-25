@@ -87,6 +87,7 @@ func (c *Crawler) getRandomUser(s *Session) (*model.User, error) {
 
 	// update the user cache if it's been over an hour
 	if c.usersUpdated.IsZero() || time.Since(c.usersUpdated) > time.Hour {
+		log.Println("crawler: updating user cache")
 		users, err := s.GetUsers()
 		if err != nil {
 			return nil, err
