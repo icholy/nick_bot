@@ -34,9 +34,8 @@ var (
 	facedir  = flag.String("face.dir", "faces", "directory to load faces from")
 	httpport = flag.String("http.port", "", "http port (example :8080)")
 
-	importLegacy = flag.String("import.legacy", "", "import a legacy database")
-	resetStore   = flag.Bool("reset.store", false, "mark all store records as available")
-	storefile    = flag.String("store", "store.db", "the store file")
+	resetStore = flag.Bool("reset.store", false, "mark all store records as available")
+	storefile  = flag.String("store", "store.db", "the store file")
 
 	postInterval = flag.Duration("post.interval", 0, "how often to post")
 	postTimes    times
@@ -105,13 +104,6 @@ func main() {
 		log.Fatal(err)
 	}
 	defer store.Close()
-
-	if *importLegacy != "" {
-		if err := store.ImportLegacyDatabase(*importLegacy); err != nil {
-			log.Fatal(err)
-		}
-		return
-	}
 
 	if *resetStore {
 		if err := store.ResetStates(); err != nil {
