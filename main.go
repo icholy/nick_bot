@@ -18,6 +18,7 @@ import (
 
 	"github.com/icholy/nick_bot/facebot"
 	"github.com/icholy/nick_bot/faceutil"
+	"github.com/icholy/nick_bot/imgstore"
 )
 
 var (
@@ -29,6 +30,8 @@ var (
 	testimg  = flag.String("test.image", "", "test image")
 	testdir  = flag.String("test.dir", "", "test a directory of images")
 	facedir  = flag.String("face.dir", "faces", "directory to load faces from")
+
+	importLegacy = flag.String("import.legacy", "", "import a legacy database")
 )
 
 func testImage(imgfile string, w io.Writer) error {
@@ -79,6 +82,17 @@ func main() {
 	flag.Parse()
 
 	faceutil.MustLoadFaces(*facedir)
+
+	if *importLegacy != "" {
+		store, err := imgstore.Open("media.db")
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err := store.ImportLegacyDatabase(*importLegacy); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 
 	if *testimg != "" {
 		if err := testImage(*testimg, os.Stdout); err != nil {
