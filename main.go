@@ -33,6 +33,7 @@ var (
 	testdir  = flag.String("test.dir", "", "test a directory of images")
 	facedir  = flag.String("face.dir", "faces", "directory to load faces from")
 	httpport = flag.String("http.port", "", "http port (example :8080)")
+	coinflip = flag.Bool("coinflip", true, "50/50 chance of posting at the requested times")
 
 	resetStore = flag.Bool("reset.store", false, "mark all store records as available")
 	storefile  = flag.String("store", "store.db", "the store file")
@@ -166,7 +167,7 @@ func main() {
 	}
 
 	maybeDoPost := func() {
-		if rand.Intn(2) == 0 {
+		if *coinflip && rand.Intn(2) == 0 {
 			return
 		}
 		if err := bot.Post(); err != nil {
