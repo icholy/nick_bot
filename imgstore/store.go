@@ -103,8 +103,8 @@ func (s *Store) SetState(id string, state model.MediaState) error {
 	if err != nil {
 		return err
 	}
-	if n == 1 {
-		return fmt.Errorf("media not found: %s", id)
+	if n == 0 {
+		return fmt.Errorf("media not found: %s, %d", id)
 	}
 	return nil
 }
