@@ -36,7 +36,7 @@ func DrawFace(canvas *image.NRGBA, faceRect image.Rectangle) *image.NRGBA {
 		paddedRect = addRectPadding(*margin, faceRect)
 
 		// resize the face image to fit inside the padded rect
-		faceImg = imaging.Fit(srcFaceImg, paddedRect.Dx(), paddedRect.Dy(), imaging.Lanczos)
+		faceImg = imaging.Resize(srcFaceImg, paddedRect.Dx(), 0, imaging.Lanczos)
 
 		// center the face rect size inside the padded rect
 		placementRect = getRectCenteredIn(faceImg.Rect, paddedRect)
