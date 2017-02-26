@@ -60,7 +60,9 @@ func (b *Bot) Start() {
 	// stat printer
 	go func() {
 		for {
-			b.printStats()
+			if err := b.printStats(); err != nil {
+				log.Printf("bot: %s\n", err)
+			}
 			time.Sleep(time.Second * 30)
 		}
 	}()
@@ -170,19 +172,20 @@ func (b *Bot) postRecord(rec *model.Record) error {
 	return session.UploadPhoto(imgpath, caption)
 }
 
-func (b *Bot) printStats() {
+func (b *Bot) printStats() error {
 	best, err := b.store.Search(0)
 	if err != nil {
-		log.Printf("bot: %s\n", err)
-	} else {
-		log.Printf("bot: best available: %s\n", best)
+		return err
 	}
+	log.Printf("bot: best available: %s\n", best)
+
 	stats, err := b.store.Stats(model.MediaAvailable)
 	if err != nil {
-		log.Printf("bot: %s\n", err)
-	} else if len(stats) == 0 {
-		log.Println("bot: store stats: no data")
-	} else {
-		log.Printf("bot: store stats:\n%s\n", stats)
+		return err
 	}
+	if len(stats) == 0 {
+		return fmt.Errorf("bot: store stats: no data")
+	}
+	log.Printf("bot: store stats:\n%s\n", stats)
+	return nil
 }
