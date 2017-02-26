@@ -12,7 +12,6 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/jasonlvhit/gocron"
 	_ "github.com/mattn/go-sqlite3"
@@ -25,7 +24,6 @@ import (
 var (
 	username = flag.String("username", "", "instagram username")
 	password = flag.String("password", "", "instagram password")
-	interval = flag.Duration("interval", time.Minute*30, "posting interval")
 	minfaces = flag.Int("minfaces", 1, "minimum faces")
 	upload   = flag.Bool("upload", false, "enable photo uploading")
 	testimg  = flag.String("test.image", "", "test image")
