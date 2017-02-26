@@ -93,7 +93,7 @@ func (s *Store) SetState(id string, state model.MediaState) error {
 	s.m.Lock()
 	defer s.m.Unlock()
 	resp, err := s.db.Exec(
-		`UPDATE media SET state = ? WHERE media_id = ? LIMIT 1`,
+		`UPDATE media SET state = ? WHERE media_id = ?`,
 		state, id,
 	)
 	if err != nil {
@@ -115,7 +115,7 @@ func (s *Store) Search(minFaces int) (*model.Record, error) {
 	row := s.db.QueryRow(`
 		SELECT *
 		FROM media
-		WHERE state == ? AND face_count >= ?
+		WHERE state = ? AND face_count >= ?
 		ORDER BY face_count ASC, like_count ASC
 		LIMIT 1
 	`, model.MediaAvailable, minFaces)
