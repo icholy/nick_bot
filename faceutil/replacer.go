@@ -15,11 +15,8 @@ var (
 	margin       = flag.Float64("margin", 50.0, "The face rectangle margin")
 	faceOpacity  = flag.Float64("face.opacity", 1.0, "Face opacity [0-255]")
 
-	shouldDrawFace          = flag.Bool("draw.face", true, "Draw the face")
-	shouldDrawRects         = flag.Bool("draw.rects", false, "Show the detection rectangles")
-	shouldDrawRectDetection = flag.Bool("draw.rects.detection", false, "Show the detection rects")
-	shouldDrawRectPadding   = flag.Bool("draw.rects.padding", false, "Show the padding rects")
-	shouldDrawRectPlacement = flag.Bool("draw.rects.placement", false, "Show the placement rects")
+	shouldDrawFace  = flag.Bool("draw.face", true, "Draw the face")
+	shouldDrawRects = flag.Bool("draw.rects", false, "Show the detection rectangles")
 )
 
 func DrawFace(canvas *image.NRGBA, faceRect image.Rectangle) *image.NRGBA {
@@ -45,13 +42,10 @@ func DrawFace(canvas *image.NRGBA, faceRect image.Rectangle) *image.NRGBA {
 	if *shouldDrawFace {
 		canvas = imaging.Overlay(canvas, faceImg, placementRect.Min, *faceOpacity)
 	}
-	if *shouldDrawRectDetection || *shouldDrawRects {
+
+	if *shouldDrawRects {
 		drawRect(canvas, faceRect, red)
-	}
-	if *shouldDrawRectPadding || *shouldDrawRects {
 		drawRect(canvas, paddedRect, green)
-	}
-	if *shouldDrawRectPlacement || *shouldDrawRects {
 		drawRect(canvas, placementRect, blue)
 	}
 
