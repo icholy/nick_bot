@@ -57,7 +57,7 @@ func (b *Bot) getCaption(rec *model.Record) string {
 	return fmt.Sprintf("%s\n\n%s", caption, credit)
 }
 
-func (b *Bot) Start() {
+func (b *Bot) Run() {
 
 	// stat printer
 	go func() {
@@ -68,15 +68,13 @@ func (b *Bot) Start() {
 	}()
 
 	// crawler loop
-	go func() {
-		crawler := instagram.NewCrawler(b.opt.Username, b.opt.Password)
-		for media := range crawler.Media() {
-			if err := b.handleMedia(media); err != nil {
-				log.Printf("bot: %s\n", err)
-			}
-			time.Sleep(time.Second * 10)
+	crawler := instagram.NewCrawler(b.opt.Username, b.opt.Password)
+	for media := range crawler.Media() {
+		if err := b.handleMedia(media); err != nil {
+			log.Printf("bot: %s\n", err)
 		}
-	}()
+		time.Sleep(time.Second * 10)
+	}
 }
 
 func (b *Bot) handleMedia(m *model.Media) error {

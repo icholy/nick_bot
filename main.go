@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/jasonlvhit/gocron"
 	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/icholy/nick_bot/facebot"
@@ -30,6 +31,7 @@ var (
 	testimg  = flag.String("test.image", "", "test image")
 	testdir  = flag.String("test.dir", "", "test a directory of images")
 	facedir  = flag.String("face.dir", "faces", "directory to load faces from")
+	postTime = flag.String("post.time", "19:00", "time of day to post")
 
 	importLegacy = flag.String("import.legacy", "", "import a legacy database")
 )
@@ -124,14 +126,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	bot.Start()
 
-	for {
+	gocron.Every(1).Day().At(*postTime).Do(func() {
 		if err := bot.Post(); err != nil {
 			log.Printf("posting error: %s\n", err)
 		}
-		time.Sleep(*interval)
-	}
+	})
+
+	bot.Run()
 }
 
 func shuffle(slice []string) {
