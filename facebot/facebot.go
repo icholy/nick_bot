@@ -100,7 +100,6 @@ func (b *Bot) handleMedia(m *model.Media) error {
 	if skip || err != nil {
 		return err
 	}
-	log.Printf("bot: found %s\n", m)
 
 	// download image
 	img, err := fetchImage(m.URL)
@@ -112,11 +111,13 @@ func (b *Bot) handleMedia(m *model.Media) error {
 	faces := faceutil.DetectFaces(img)
 
 	// write to store
-	return b.store.Put(&model.Record{
+	rec := &model.Record{
 		Media:     *m,
 		FaceCount: len(faces),
 		State:     model.MediaAvailable,
-	})
+	}
+	log.Printf("bot: found %s\n", rec)
+	return b.store.Put(rec)
 }
 
 func (b *Bot) post() error {
