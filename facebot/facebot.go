@@ -42,7 +42,7 @@ func New(o *Options) (*Bot, error) {
 }
 
 func (b *Bot) getCaption(rec *model.Record) string {
-	credit := fmt.Sprint("photocred goes to: @%s", rec.Username)
+	credit := fmt.Sprintf("photocred goes to: @%s", rec.Username)
 	captions := b.opt.Captions
 	if len(captions) == 0 {
 		return credit
