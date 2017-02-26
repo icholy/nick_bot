@@ -116,7 +116,7 @@ func (s *Store) Search(minFaces int) (*model.Record, error) {
 		SELECT *
 		FROM media
 		WHERE state = ? AND face_count >= ?
-		ORDER BY face_count ASC, like_count ASC
+		ORDER BY face_count DESC, like_count DESC
 		LIMIT 1
 	`, model.MediaAvailable, minFaces)
 	return scanRecord(row)
