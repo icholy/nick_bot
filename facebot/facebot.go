@@ -2,6 +2,7 @@ package facebot
 
 import (
 	"fmt"
+	"image"
 	"log"
 	"path/filepath"
 	"time"
@@ -118,6 +119,19 @@ func (b *Bot) Post() error {
 	} else {
 		return b.store.SetState(rec.ID, model.MediaUsed)
 	}
+}
+
+func (b *Bot) Demo() (image.Image, error) {
+	rec, err := b.store.Search(b.opt.MinFaces)
+	if err != nil {
+		return nil, err
+	}
+	img, err := fetchImage(rec.URL)
+	if err != nil {
+		return nil, err
+	}
+	newImage := faceutil.ReplaceFaces(img)
+	return newImage, nil
 }
 
 func (b *Bot) postRecord(rec *model.Record) error {
