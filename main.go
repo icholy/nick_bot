@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"image"
@@ -22,6 +23,7 @@ import (
 	"github.com/icholy/nick_bot/facebot"
 	"github.com/icholy/nick_bot/faceutil"
 	"github.com/icholy/nick_bot/imgstore"
+	"github.com/icholy/nick_bot/model"
 )
 
 var (
@@ -144,7 +146,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	bot.Start()
+	go bot.Run()
 
 	if *httpport != "" {
 		http.HandleFunc("/demo", func(w http.ResponseWriter, r *http.Request) {
@@ -155,6 +157,18 @@ func main() {
 			}
 			w.Header().Add("Content-Type", "image/jpeg")
 			if err := jpeg.Encode(w, img, &jpeg.Options{Quality: jpeg.DefaultQuality}); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		})
+		http.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
+			stats, err := store.Stats(model.MediaAvailable)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Add("Content-Type", "application/json")
+			if err := json.NewEncoder(w).Encode(stats); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}

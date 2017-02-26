@@ -6,8 +6,8 @@ import (
 )
 
 type Stat struct {
-	Faces int
-	Count int64
+	Faces int   `json:"faces"`
+	Count int64 `json:"count"`
 }
 
 func (s *Stat) String() string {

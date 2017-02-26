@@ -5,7 +5,6 @@ import (
 	"image"
 	"log"
 	"path/filepath"
-	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -55,27 +54,13 @@ func (b *Bot) getCaption(rec *model.Record) string {
 	return fmt.Sprintf("%s\n\n%s", caption, credit)
 }
 
-func (b *Bot) Start() {
-
-	// stat printer
-	go func() {
-		for {
-			if err := b.printStats(); err != nil {
-				log.Printf("bot: %s\n", err)
-			}
-			time.Sleep(time.Second * 30)
+func (b *Bot) Run() {
+	crawler := instagram.NewCrawler(b.opt.Username, b.opt.Password)
+	for media := range crawler.Media() {
+		if err := b.handleMedia(media); err != nil {
+			log.Printf("bot: %s\n", err)
 		}
-	}()
-
-	// crawler loop
-	go func() {
-		crawler := instagram.NewCrawler(b.opt.Username, b.opt.Password)
-		for media := range crawler.Media() {
-			if err := b.handleMedia(media); err != nil {
-				log.Printf("bot: %s\n", err)
-			}
-		}
-	}()
+	}
 }
 
 func (b *Bot) handleMedia(m *model.Media) error {
@@ -170,16 +155,4 @@ func (b *Bot) postRecord(rec *model.Record) error {
 	defer session.Close()
 	caption := b.getCaption(rec)
 	return session.UploadPhoto(imgpath, caption)
-}
-
-func (b *Bot) printStats() error {
-	stats, err := b.store.Stats(model.MediaAvailable)
-	if err != nil {
-		return err
-	}
-	if len(stats) == 0 {
-		return fmt.Errorf("bot: store stats: no data")
-	}
-	log.Printf("bot: store stats:\n%s\n", stats)
-	return nil
 }
