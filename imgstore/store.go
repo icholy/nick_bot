@@ -149,6 +149,16 @@ func (s *Store) Stats(state model.MediaState) (Stats, error) {
 	return stats, nil
 }
 
+func (s *Store) ResetStates() error {
+	s.m.Lock()
+	defer s.m.Unlock()
+	_, err := s.db.Exec(
+		`UPDATE media SET state = ?`,
+		model.MediaAvailable,
+	)
+	return err
+}
+
 func scanRecord(row *sql.Row) (*model.Record, error) {
 	var (
 		rec      model.Record

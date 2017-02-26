@@ -34,6 +34,7 @@ var (
 	postInterval = flag.Duration("post.interval", 0, "how often to post")
 	postNever    = flag.Bool("post.never", false, "disable posting")
 	importLegacy = flag.String("import.legacy", "", "import a legacy database")
+	resetStore   = flag.Bool("reset.store", false, "mark all store records as available")
 )
 
 func testImage(imgfile string, w io.Writer) error {
@@ -91,6 +92,17 @@ func main() {
 			log.Fatal(err)
 		}
 		if err := store.ImportLegacyDatabase(*importLegacy); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+
+	if *resetStore {
+		store, err := imgstore.Open("media.db")
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err := store.ResetStates(); err != nil {
 			log.Fatal(err)
 		}
 		return
