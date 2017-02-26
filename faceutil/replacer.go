@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	minNeighboor = flag.Int("min.neighboor", 5, "the lower this number is, the more faces will be found")
+	minNeighboor = flag.Int("min.neighboor", 9, "the lower this number is, the more faces will be found")
 	haarCascade  = flag.String("haar", "haarcascade_frontalface_alt.xml", "The location of the Haar Cascade XML configuration to be provided to OpenCV.")
 	margin       = flag.Float64("margin", 50.0, "The face rectangle margin")
 	faceOpacity  = flag.Float64("face.opacity", 1.0, "Face opacity [0-255]")
