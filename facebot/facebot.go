@@ -20,6 +20,7 @@ type Options struct {
 	MinFaces int
 	Upload   bool
 	Captions []string
+	Store    *imgstore.Store
 }
 
 type Bot struct {
@@ -30,16 +31,12 @@ type Bot struct {
 }
 
 func New(o *Options) (*Bot, error) {
-	if o.MinFaces == 0 {
+	if o.MinFaces < 1 {
 		o.MinFaces = 1
-	}
-	store, err := imgstore.Open("media.db")
-	if err != nil {
-		return nil, err
 	}
 	return &Bot{
 		opt:   o,
-		store: store,
+		store: o.Store,
 	}, nil
 }
 
