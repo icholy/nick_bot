@@ -69,7 +69,7 @@ func testImage(imgfile string, w io.Writer) error {
 	faces := faceutil.DetectFaces(baseImage)
 	log.Printf("found %d face(s) in image\n", len(faces))
 	newImage := faceutil.DrawFaces(baseImage, faces)
-	return jpeg.Encode(w, newImage, &jpeg.Options{jpeg.DefaultQuality})
+	return jpeg.Encode(w, newImage, &jpeg.Options{Quality: jpeg.DefaultQuality})
 }
 
 func testImageDir(dir string) error {
@@ -153,14 +153,14 @@ func main() {
 				return
 			}
 			w.Header().Add("Content-Type", "image/jpeg")
-			if err := jpeg.Encode(w, img, &jpeg.Options{jpeg.DefaultQuality}); err != nil {
+			if err := jpeg.Encode(w, img, &jpeg.Options{Quality: jpeg.DefaultQuality}); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 		})
 		go func() {
 			if err := http.ListenAndServe(*httpport, nil); err != nil {
-				log.Println("error: %s\n", err)
+				log.Printf("error: %s\n", err)
 			}
 		}()
 	}
