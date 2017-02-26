@@ -109,19 +109,6 @@ func (s *Store) SetState(id string, state model.MediaState) error {
 	return nil
 }
 
-func (s *Store) Search(minFaces int) (*model.Record, error) {
-	s.m.Lock()
-	defer s.m.Unlock()
-	row := s.db.QueryRow(`
-		SELECT *
-		FROM media
-		WHERE state = ? AND face_count >= ?
-		ORDER BY face_count DESC, like_count DESC
-		LIMIT 1
-	`, model.MediaAvailable, minFaces)
-	return scanRecord(row)
-}
-
 func (s *Store) Stats(state model.MediaState) (Stats, error) {
 	s.m.Lock()
 	defer s.m.Unlock()

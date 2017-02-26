@@ -108,7 +108,7 @@ func (b *Bot) handleMedia(m *model.Media) error {
 func (b *Bot) Post() error {
 
 	// find the best image
-	rec, err := b.store.Search(b.opt.MinFaces)
+	rec, err := b.store.SearchRandom(b.opt.MinFaces)
 	if err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func (b *Bot) Post() error {
 }
 
 func (b *Bot) Demo() (image.Image, error) {
-	rec, err := b.store.Search(b.opt.MinFaces)
+	rec, err := b.store.SearchRandom(b.opt.MinFaces)
 	if err != nil {
 		return nil, err
 	}
@@ -173,12 +173,6 @@ func (b *Bot) postRecord(rec *model.Record) error {
 }
 
 func (b *Bot) printStats() error {
-	best, err := b.store.Search(0)
-	if err != nil {
-		return err
-	}
-	log.Printf("bot: best available: %s\n", best)
-
 	stats, err := b.store.Stats(model.MediaAvailable)
 	if err != nil {
 		return err
