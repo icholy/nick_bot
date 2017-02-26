@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -31,6 +32,7 @@ var (
 	testimg  = flag.String("test.image", "", "test image")
 	testdir  = flag.String("test.dir", "", "test a directory of images")
 	facedir  = flag.String("face.dir", "faces", "directory to load faces from")
+	httpport = flag.String("http.port", "", "http port (example :8080)")
 
 	importLegacy = flag.String("import.legacy", "", "import a legacy database")
 	resetStore   = flag.Bool("reset.store", false, "mark all store records as available")
@@ -150,6 +152,26 @@ func main() {
 		log.Fatal(err)
 	}
 	bot.Start()
+
+	if *httpport != "" {
+		http.HandleFunc("/demo", func(w http.ResponseWriter, r *http.Request) {
+			img, err := bot.Demo()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Add("Content-Type", "image/jpeg")
+			if err := jpeg.Encode(w, img, &jpeg.Options{jpeg.DefaultQuality}); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		})
+		go func() {
+			if err := http.ListenAndServe(*httpport, nil); err != nil {
+				log.Println("error: %s\n", err)
+			}
+		}()
+	}
 
 	doPost := func() {
 		if err := bot.Post(); err != nil {
