@@ -20,10 +20,10 @@ var strategies = []struct {
 	P int
 	S SearchStrategy
 }{
-	{25, MostFacesUserStrategy},
-	{25, MostLikesGlobalStrategy},
-	{25, MostFacesUserStrategy},
-	{25, MostLikesUserStrategy},
+	{10, MostFacesGlobalStrategy},
+	{10, MostLikesGlobalStrategy},
+	{40, MostFacesUserStrategy},
+	{40, MostLikesUserStrategy},
 }
 
 func init() {
