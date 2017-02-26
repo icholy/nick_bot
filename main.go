@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"flag"
+	"fmt"
 	"image"
 	"image/jpeg"
 	_ "image/png"
@@ -23,20 +24,36 @@ import (
 )
 
 var (
-	username     = flag.String("username", "", "instagram username")
-	password     = flag.String("password", "", "instagram password")
-	minfaces     = flag.Int("minfaces", 1, "minimum faces")
-	upload       = flag.Bool("upload", false, "enable photo uploading")
-	testimg      = flag.String("test.image", "", "test image")
-	testdir      = flag.String("test.dir", "", "test a directory of images")
-	facedir      = flag.String("face.dir", "faces", "directory to load faces from")
-	postTime     = flag.String("post.time", "19:00", "time of day to post")
-	postInterval = flag.Duration("post.interval", 0, "how often to post")
-	postNever    = flag.Bool("post.never", false, "disable posting")
+	username = flag.String("username", "", "instagram username")
+	password = flag.String("password", "", "instagram password")
+	minfaces = flag.Int("minfaces", 1, "minimum faces")
+	upload   = flag.Bool("upload", false, "enable photo uploading")
+	testimg  = flag.String("test.image", "", "test image")
+	testdir  = flag.String("test.dir", "", "test a directory of images")
+	facedir  = flag.String("face.dir", "faces", "directory to load faces from")
+
 	importLegacy = flag.String("import.legacy", "", "import a legacy database")
 	resetStore   = flag.Bool("reset.store", false, "mark all store records as available")
 	storefile    = flag.String("store", "store.db", "the store file")
+
+	postInterval = flag.Duration("post.interval", 0, "how often to post")
+	postTimes    times
 )
+
+func init() {
+	flag.Var(&postTimes, "post.time", "time to post")
+}
+
+type times []string
+
+func (t *times) String() string {
+	return fmt.Sprint(*t)
+}
+
+func (t *times) Set(value string) error {
+	*t = append(*t, value)
+	return nil
+}
 
 func testImage(imgfile string, w io.Writer) error {
 	f, err := os.Open(imgfile)
@@ -147,16 +164,18 @@ func main() {
 	}
 
 	switch {
-	case *postNever:
-		select {}
 	case *postInterval != 0:
 		for {
 			doPost()
 			time.Sleep(*postInterval)
 		}
-	default:
-		gocron.Every(1).Day().At(*postTime).Do(doPost)
+	case len(postTimes) > 0:
+		for _, t := range postTimes {
+			gocron.Every(1).Day().At(t).Do(doPost)
+		}
 		<-gocron.Start()
+	default:
+		select {}
 	}
 }
 
