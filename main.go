@@ -133,6 +133,7 @@ func main() {
 		}
 	})
 
+	gocron.Start()
 	bot.Run()
 }
 
