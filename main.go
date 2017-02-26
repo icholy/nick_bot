@@ -28,6 +28,7 @@ var (
 	upload   = flag.Bool("upload", false, "enable photo uploading")
 	testimg  = flag.String("test.image", "", "test image")
 	testdir  = flag.String("test.dir", "", "test a directory of images")
+	facedir  = flag.String("face.dir", "faces", "directory to load faces from")
 )
 
 func testImage(imgfile string, w io.Writer) error {
@@ -77,7 +78,7 @@ func testImageDir(dir string) error {
 func main() {
 	flag.Parse()
 
-	faceutil.MustLoadFaces("faces")
+	faceutil.MustLoadFaces(*facedir)
 
 	if *testimg != "" {
 		if err := testImage(*testimg, os.Stdout); err != nil {
