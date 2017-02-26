@@ -21,7 +21,7 @@ type Media struct {
 
 func (m *Media) String() string {
 	return fmt.Sprintf("Media: [%d likes] @%s %s",
-		m.LikeCount, m.PostedAt, m.URL,
+		m.LikeCount, m.Username, m.URL,
 	)
 }
 
