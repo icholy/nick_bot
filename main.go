@@ -12,6 +12,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/jasonlvhit/gocron"
 	_ "github.com/mattn/go-sqlite3"
@@ -22,14 +23,15 @@ import (
 )
 
 var (
-	username = flag.String("username", "", "instagram username")
-	password = flag.String("password", "", "instagram password")
-	minfaces = flag.Int("minfaces", 1, "minimum faces")
-	upload   = flag.Bool("upload", false, "enable photo uploading")
-	testimg  = flag.String("test.image", "", "test image")
-	testdir  = flag.String("test.dir", "", "test a directory of images")
-	facedir  = flag.String("face.dir", "faces", "directory to load faces from")
-	postTime = flag.String("post.time", "19:00", "time of day to post")
+	username     = flag.String("username", "", "instagram username")
+	password     = flag.String("password", "", "instagram password")
+	minfaces     = flag.Int("minfaces", 1, "minimum faces")
+	upload       = flag.Bool("upload", false, "enable photo uploading")
+	testimg      = flag.String("test.image", "", "test image")
+	testdir      = flag.String("test.dir", "", "test a directory of images")
+	facedir      = flag.String("face.dir", "faces", "directory to load faces from")
+	postTime     = flag.String("post.time", "19:00", "time of day to post")
+	postInterval = flag.Duration("post.interval", 0, "how often to post")
 
 	importLegacy = flag.String("import.legacy", "", "import a legacy database")
 )
@@ -124,15 +126,23 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	bot.Start()
 
-	gocron.Every(1).Day().At(*postTime).Do(func() {
+	doPost := func() {
 		if err := bot.Post(); err != nil {
 			log.Printf("posting error: %s\n", err)
 		}
-	})
+	}
 
-	gocron.Start()
-	bot.Run()
+	if *postInterval != 0 {
+		for {
+			doPost()
+			time.Sleep(*postInterval)
+		}
+	} else {
+		gocron.Every(1).Day().At(*postTime).Do(doPost)
+		<-gocron.Start()
+	}
 }
 
 func shuffle(slice []string) {
