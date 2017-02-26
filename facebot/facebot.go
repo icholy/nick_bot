@@ -74,7 +74,6 @@ func (b *Bot) Start() {
 			if err := b.handleMedia(media); err != nil {
 				log.Printf("bot: %s\n", err)
 			}
-			time.Sleep(time.Second * 2)
 		}
 	}()
 }
