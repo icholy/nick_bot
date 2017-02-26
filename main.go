@@ -165,7 +165,10 @@ func main() {
 		}()
 	}
 
-	doPost := func() {
+	maybeDoPost := func() {
+		if rand.Intn(2) == 0 {
+			return
+		}
 		if err := bot.Post(); err != nil {
 			log.Printf("posting error: %s\n", err)
 		}
@@ -174,12 +177,12 @@ func main() {
 	switch {
 	case *postInterval != 0:
 		for {
-			doPost()
+			maybeDoPost()
 			time.Sleep(*postInterval)
 		}
 	case len(postTimes) > 0:
 		for _, t := range postTimes {
-			gocron.Every(1).Day().At(t).Do(doPost)
+			gocron.Every(1).Day().At(t).Do(maybeDoPost)
 		}
 		<-gocron.Start()
 	default:
