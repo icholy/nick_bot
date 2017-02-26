@@ -40,7 +40,7 @@ type Record struct {
 }
 
 func (rec *Record) String() string {
-	return fmt.Sprintf("Record: [%d likes] [%d faces] @%s %s",
+	return fmt.Sprintf("Record: [%d like(s)] [%d face(s)] @%s %s",
 		rec.LikeCount,
 		rec.FaceCount,
 		rec.Username,
