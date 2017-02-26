@@ -129,8 +129,7 @@ func (b *Bot) postRecord(rec *model.Record) error {
 	}
 
 	// replace the faces
-	faces := faceutil.DetectFaces(img)
-	newImage, err := faceutil.DrawFaces(img, faces)
+	newImage := faceutil.ReplaceFaces(img)
 	if err != nil {
 		return err
 	}

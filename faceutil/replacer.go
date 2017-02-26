@@ -52,12 +52,12 @@ func DrawFace(canvas *image.NRGBA, faceRect image.Rectangle) *image.NRGBA {
 	return canvas
 }
 
-func DrawFaces(base image.Image, rects []image.Rectangle) (*image.NRGBA, error) {
+func DrawFaces(base image.Image, rects []image.Rectangle) *image.NRGBA {
 	canvas := canvasFromImage(base)
 	for _, faceRect := range rects {
 		canvas = DrawFace(canvas, faceRect)
 	}
-	return canvas, nil
+	return canvas
 }
 
 func DetectFaces(i image.Image) []image.Rectangle {
@@ -74,4 +74,9 @@ func DetectFaces(i image.Image) []image.Rectangle {
 		})
 	}
 	return output
+}
+
+func ReplaceFaces(i image.Image) *image.NRGBA {
+	faces := DetectFaces(i)
+	return DrawFaces(i, faces)
 }
