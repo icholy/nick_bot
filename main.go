@@ -32,7 +32,7 @@ var (
 	facedir      = flag.String("face.dir", "faces", "directory to load faces from")
 	postTime     = flag.String("post.time", "19:00", "time of day to post")
 	postInterval = flag.Duration("post.interval", 0, "how often to post")
-	postNever    = flag.Bool("post.never", false, "never post")
+	postNever    = flag.Bool("post.never", false, "disable posting")
 
 	importLegacy = flag.String("import.legacy", "", "import a legacy database")
 )
