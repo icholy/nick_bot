@@ -75,7 +75,6 @@ func (b *Bot) Run() {
 	go func() {
 		crawler := instagram.NewCrawler(b.opt.Username, b.opt.Password)
 		for media := range crawler.Media() {
-			log.Printf("bot: crawler found: %s\n", media)
 			if err := b.handleMedia(media); err != nil {
 				log.Printf("bot: %s\n", err)
 			}
@@ -101,6 +100,7 @@ func (b *Bot) handleMedia(m *model.Media) error {
 	if skip || err != nil {
 		return err
 	}
+	log.Printf("bot: found %s\n", m)
 
 	// download image
 	img, err := fetchImage(m.URL)
