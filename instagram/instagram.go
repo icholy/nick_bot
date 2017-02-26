@@ -2,6 +2,7 @@ package instagram
 
 import (
 	"errors"
+	"net/url"
 	"time"
 
 	"github.com/ahmdrz/goinsta"
@@ -55,9 +56,16 @@ func (s *Session) GetRecentUserMedias(u *model.User) ([]*model.Media, error) {
 			continue
 		}
 		m := s.getLargestCandidate(item.ImageVersions2.Candidates)
+
+		// remove token from url
+		mediaURL, err := s.cleanURL(m.URL)
+		if err != nil {
+			return nil, err
+		}
+
 		images = append(images, &model.Media{
 			ID:        item.ID,
-			URL:       m.URL,
+			URL:       mediaURL,
 			UserID:    u.ID,
 			Username:  u.Name,
 			LikeCount: item.LikeCount,
@@ -95,4 +103,13 @@ func (s *Session) UploadPhoto(imgPath string, caption string) error {
 		return ErrInvalidResponseStatus
 	}
 	return nil
+}
+
+func (Session) cleanURL(rawurl string) (string, error) {
+	u, err := url.Parse(rawurl)
+	if err != nil {
+		return "", err
+	}
+	u.RawQuery = ""
+	return u.String(), nil
 }
