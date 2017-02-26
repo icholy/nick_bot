@@ -2,6 +2,7 @@ package imgstore
 
 import (
 	"database/sql"
+	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -54,6 +55,7 @@ func (s *Store) ImportLegacyDatabase(dbfile string) error {
 	if err != nil {
 		return err
 	}
+	var count int64
 	for rows.Next() {
 		media, err := scanLegacyRow(rows)
 		if err != nil {
@@ -63,6 +65,8 @@ func (s *Store) ImportLegacyDatabase(dbfile string) error {
 		if err := s.Put(rec); err != nil {
 			return err
 		}
+		count++
 	}
+	log.Printf("Imported %d records\n", count)
 	return rows.Err()
 }
