@@ -115,17 +115,23 @@ func main() {
 	shuffle(captions)
 
 	bot, err := facebot.New(&facebot.Options{
-		Username:     *username,
-		Password:     *password,
-		MinFaces:     *minfaces,
-		PostInterval: *interval,
-		Upload:       *upload,
-		Captions:     captions,
+		Username: *username,
+		Password: *password,
+		MinFaces: *minfaces,
+		Upload:   *upload,
+		Captions: captions,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
-	bot.Run()
+	bot.Start()
+
+	for {
+		if err := bot.Post(); err != nil {
+			log.Printf("posting error: %s\n", err)
+		}
+		time.Sleep(*interval)
+	}
 }
 
 func shuffle(slice []string) {

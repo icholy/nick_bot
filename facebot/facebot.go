@@ -15,12 +15,11 @@ import (
 )
 
 type Options struct {
-	Username     string
-	Password     string
-	MinFaces     int
-	Upload       bool
-	PostInterval time.Duration
-	Captions     []string
+	Username string
+	Password string
+	MinFaces int
+	Upload   bool
+	Captions []string
 }
 
 type Bot struct {
@@ -33,9 +32,6 @@ type Bot struct {
 func New(o *Options) (*Bot, error) {
 	if o.MinFaces == 0 {
 		o.MinFaces = 1
-	}
-	if o.PostInterval == 0 {
-		o.PostInterval = time.Hour * 24
 	}
 	store, err := imgstore.Open("media.db")
 	if err != nil {
@@ -61,7 +57,7 @@ func (b *Bot) getCaption(rec *model.Record) string {
 	return fmt.Sprintf("%s\n\n%s", caption, credit)
 }
 
-func (b *Bot) Run() {
+func (b *Bot) Start() {
 
 	// stat printer
 	go func() {
@@ -81,16 +77,6 @@ func (b *Bot) Run() {
 			time.Sleep(time.Second * 10)
 		}
 	}()
-
-	// posting loop
-	for {
-		log.Println("bot: trying to post")
-		if err := b.post(); err != nil {
-			log.Printf("bot: %s\n", err)
-		}
-		log.Printf("bot: sleeping for %s\n", b.opt.PostInterval)
-		time.Sleep(b.opt.PostInterval)
-	}
 }
 
 func (b *Bot) handleMedia(m *model.Media) error {
@@ -120,7 +106,7 @@ func (b *Bot) handleMedia(m *model.Media) error {
 	return b.store.Put(rec)
 }
 
-func (b *Bot) post() error {
+func (b *Bot) Post() error {
 
 	// find the best image
 	rec, err := b.store.Search(b.opt.MinFaces)
