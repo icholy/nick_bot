@@ -44,6 +44,15 @@ var (
 	postTimes    times
 )
 
+var banner = `
+  _  _ _    _     ___      _
+ | \| (_)__| |__ | _ ) ___| |
+ | .' | / _| / / | _ \/ _ \  _|
+ |_|\_|_\__|_\_\ |___/\___/\__|
+
+ Adding some much needed nick to your photos.
+`
+
 func init() {
 	flag.Var(&postTimes, "post.time", "time to post")
 }
@@ -99,6 +108,8 @@ func testImageDir(dir string) error {
 
 func main() {
 	flag.Parse()
+
+	fmt.Println(banner)
 
 	faceutil.MustLoadFaces(*facedir)
 
