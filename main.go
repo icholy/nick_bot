@@ -148,7 +148,7 @@ func startBot(store *imgstore.Store) error {
 				case "everyday":
 					gocron.Every(1).Day().At(t).Do(doPost)
 				default:
-					log.Fatalf("invalid scheduel key: %s", day)
+					log.Fatalf("invalid schedule key: %s", day)
 				}
 			}
 		}
