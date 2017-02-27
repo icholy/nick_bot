@@ -51,6 +51,12 @@ func (s *Session) GetRecentUserMedias(u *model.User) ([]*model.Media, error) {
 	}
 	var images []*model.Media
 	for _, item := range resp.Items {
+
+		// skip any non-images
+		if item.MediaType != 1 {
+			continue
+		}
+
 		candidates := item.ImageVersions2.Candidates
 		if len(candidates) == 0 {
 			continue
