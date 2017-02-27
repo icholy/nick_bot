@@ -92,24 +92,6 @@ func (s *Store) searchMostFacesUser(minFaces int) (*model.Record, error) {
 	return scanRecord(row)
 }
 
-func (s *Store) randomUserWithPhotos(minFaces int) (*model.User, error) {
-	s.m.Lock()
-	defer s.m.Unlock()
-	var u model.User
-	if err := s.db.QueryRow(`
-		SELECT user_id, user_name
-		FROM media
-		WHERE state = ? AND face_count >= ?
-		GROUP BY user_id, user_name
-		ORDER BY RANDOM()
-		LIMIT 1
-	`, model.MediaAvailable, minFaces,
-	).Scan(&u.ID, &u.Name); err != nil {
-		return nil, err
-	}
-	return &u, nil
-}
-
 func (s *Store) searchMostScoreUser(minFaces int) (*model.Record, error) {
 	user, err := s.randomUserWithPhotos(minFaces)
 	if err != nil {
@@ -138,4 +120,22 @@ func (s *Store) searchMostScoreGlobal(minFaces int) (*model.Record, error) {
 		LIMIT 1
 	`, model.MediaAvailable, minFaces)
 	return scanRecord(row)
+}
+
+func (s *Store) randomUserWithPhotos(minFaces int) (*model.User, error) {
+	s.m.Lock()
+	defer s.m.Unlock()
+	var u model.User
+	if err := s.db.QueryRow(`
+		SELECT user_id, user_name
+		FROM media
+		WHERE state = ? AND face_count >= ?
+		GROUP BY user_id, user_name
+		ORDER BY RANDOM()
+		LIMIT 1
+	`, model.MediaAvailable, minFaces,
+	).Scan(&u.ID, &u.Name); err != nil {
+		return nil, err
+	}
+	return &u, nil
 }
