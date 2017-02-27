@@ -36,7 +36,6 @@ var (
 	testdir  = flag.String("test.dir", "", "test a directory of images")
 	facedir  = flag.String("face.dir", "faces", "directory to load faces from")
 	httpport = flag.String("http.port", "", "http port (example :8080)")
-	coinflip = flag.Bool("coinflip", true, "50/50 chance of posting at the requested times")
 
 	resetStore = flag.Bool("reset.store", false, "mark all store records as available")
 	storefile  = flag.String("store", "store.db", "the store file")
@@ -192,10 +191,7 @@ func main() {
 		}()
 	}
 
-	maybeDoPost := func() {
-		if *coinflip && rand.Intn(2) == 0 {
-			return
-		}
+	doPost := func() {
 		if err := bot.Post(); err != nil {
 			log.Printf("posting error: %s\n", err)
 		}
@@ -204,12 +200,12 @@ func main() {
 	switch {
 	case *postInterval != 0:
 		for {
-			maybeDoPost()
+			doPost()
 			time.Sleep(*postInterval)
 		}
 	case len(postTimes) > 0:
 		for _, t := range postTimes {
-			gocron.Every(1).Day().At(t).Do(maybeDoPost)
+			gocron.Every(1).Day().At(t).Do(doPost)
 		}
 		<-gocron.Start()
 	default:
