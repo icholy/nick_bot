@@ -37,6 +37,7 @@ func (s *Store) initDatabase() error {
 	s.m.Lock()
 	defer s.m.Unlock()
 	_, err := s.db.Exec(`
+		BEGIN;
 		CREATE TABLE IF NOT EXISTS media (
 			media_id    TEXT,
 			media_url   TEXT,
@@ -46,7 +47,9 @@ func (s *Store) initDatabase() error {
 			face_count  INTEGER,
 			posted_at   INTEGER,
 			state       INTEGER
-		)
+		);
+		CREATE INDEC IF NOT EXISTS media_id_idx ON media (media_id);
+		COMMIT;
 	`)
 	return err
 }
