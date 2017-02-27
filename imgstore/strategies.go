@@ -44,7 +44,7 @@ var strategies = []struct {
 	{10, FacesGlobalStrategy},
 	{10, LikesGlobalStrategy},
 	{10, ScoreGlobalStrategy},
-	{20, FacesUserStrategy},
+	{25, FacesUserStrategy},
 	{20, LikesUserStrategy},
 	{20, ScoreUserStrategy},
 	{5, RandomStrategy},
