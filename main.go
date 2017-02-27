@@ -10,6 +10,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/jasonlvhit/gocron"
@@ -36,7 +37,6 @@ var (
 
 	postNow      = flag.Bool("post.now", false, "post and exit")
 	postInterval = flag.Duration("post.interval", 0, "how often to post")
-	postTimes    stringFlags
 )
 
 var banner = `
@@ -47,21 +47,6 @@ var banner = `
 
  Adding some much needed nick to your photos.
 `
-
-func init() {
-	flag.Var(&postTimes, "post.time", "time to post")
-}
-
-type stringFlags []string
-
-func (sf *stringFlags) String() string {
-	return fmt.Sprint(*sf)
-}
-
-func (sf *stringFlags) Set(value string) error {
-	*sf = append(*sf, value)
-	return nil
-}
 
 func main() {
 	flag.Parse()
@@ -137,13 +122,37 @@ func startBot(store *imgstore.Store) error {
 			doPost()
 			time.Sleep(*postInterval)
 		}
-	case len(postTimes) > 0:
-		for _, t := range postTimes {
-			gocron.Every(1).Day().At(t).Do(doPost)
+	default:
+		schedule, err := loadSchedule("schedule.json")
+		if err != nil {
+			log.Fatal(err)
+		}
+		for day, times := range schedule {
+			day = strings.ToLower(day)
+			for _, t := range times {
+				switch day {
+				case "monday":
+					gocron.Every(1).Monday().At(t).Do(doPost)
+				case "tuesday":
+					gocron.Every(1).Tuesday().At(t).Do(doPost)
+				case "wednesday":
+					gocron.Every(1).Wednesday().At(t).Do(doPost)
+				case "thursday":
+					gocron.Every(1).Thursday().At(t).Do(doPost)
+				case "friday":
+					gocron.Every(1).Friday().At(t).Do(doPost)
+				case "saturday":
+					gocron.Every(1).Saturday().At(t).Do(doPost)
+				case "sunday":
+					gocron.Every(1).Sunday().At(t).Do(doPost)
+				case "everyday":
+					gocron.Every(1).Day().At(t).Do(doPost)
+				default:
+					log.Fatalf("invalid scheduel key: %s", day)
+				}
+			}
 		}
 		<-gocron.Start()
-	default:
-		select {}
 	}
 
 	return nil
