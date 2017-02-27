@@ -66,8 +66,6 @@ func (t *times) Set(value string) error {
 func main() {
 	flag.Parse()
 
-	fmt.Println(banner)
-
 	faceutil.MustLoadFaces(*facedir)
 
 	store, err := imgstore.Open(*storefile)
@@ -96,6 +94,8 @@ func main() {
 		}
 		return
 	}
+
+	fmt.Println(banner)
 
 	captions, err := readLines("captions.txt")
 	if err != nil {
