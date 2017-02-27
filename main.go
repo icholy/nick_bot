@@ -40,6 +40,7 @@ var (
 	resetStore = flag.Bool("reset.store", false, "mark all store records as available")
 	storefile  = flag.String("store", "store.db", "the store file")
 
+	postNow      = flag.Bool("post.now", false, "post and exit")
 	postInterval = flag.Duration("post.interval", 0, "how often to post")
 	postTimes    times
 )
@@ -198,6 +199,9 @@ func main() {
 	}
 
 	switch {
+	case *postNow:
+		doPost()
+		return
 	case *postInterval != 0:
 		for {
 			doPost()
