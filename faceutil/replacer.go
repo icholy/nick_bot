@@ -17,13 +17,7 @@ var (
 
 	shouldDrawFace  = flag.Bool("draw.face", true, "Draw the face")
 	shouldDrawRects = flag.Bool("draw.rects", false, "Show the detection rectangles")
-
-	cascade *opencv.HaarCascade
 )
-
-func init() {
-	cascade = opencv.LoadHaarClassifierCascade(*haarCascade)
-}
 
 func DrawFace(canvas *image.NRGBA, faceRect image.Rectangle) *image.NRGBA {
 	var (
@@ -67,8 +61,12 @@ func DrawFaces(base image.Image, rects []image.Rectangle) *image.NRGBA {
 }
 
 func DetectFaces(i image.Image) []image.Rectangle {
-	var output []image.Rectangle
-	faces := cascade.DetectObjects(opencv.FromImage(i), *minNeighboor)
+	var (
+		output  []image.Rectangle
+		cascade = opencv.LoadHaarClassifierCascade(*haarCascade)
+		faces   = cascade.DetectObjects(opencv.FromImage(i), *minNeighboor)
+	)
+	defer cascade.Release()
 	for _, face := range faces {
 		output = append(output, image.Rectangle{
 			Min: image.Point{face.X(), face.Y()},
