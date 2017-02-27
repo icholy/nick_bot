@@ -27,6 +27,8 @@ func (s *Store) Search(minFaces int, strategy SearchStrategy) (*model.Record, er
 		return s.searchFacesUser(minFaces)
 	case ScoreUserStrategy:
 		return s.searchScoreUser(minFaces)
+	case RandomStrategy:
+		return s.searchRandom(minFaces)
 	default:
 		return nil, errors.New("strategy not implemented")
 	}
@@ -122,7 +124,7 @@ func (s *Store) searchScoreGlobal(minFaces int) (*model.Record, error) {
 	return scanRecord(row)
 }
 
-func (s *Store) searchRandomGlobal(minFaces int) (*model.Record, error) {
+func (s *Store) searchRandom(minFaces int) (*model.Record, error) {
 	s.m.Lock()
 	defer s.m.Unlock()
 	row := s.db.QueryRow(`
@@ -132,23 +134,6 @@ func (s *Store) searchRandomGlobal(minFaces int) (*model.Record, error) {
 		ORDER BY RANDOM()
 		LIMIT 1
 	`, model.MediaAvailable, minFaces)
-	return scanRecord(row)
-}
-
-func (s *Store) searchRandomUser(minFaces int) (*model.Record, error) {
-	user, err := s.randomUserWithPhotos(minFaces)
-	if err != nil {
-		return nil, err
-	}
-	s.m.Lock()
-	defer s.m.Unlock()
-	row := s.db.QueryRow(`
-		SELECT *
-		FROM media
-		WHERE state = ? AND face_count >= ? AND user_id = ?
-		ORDER BY RANDOM()
-		LIMIT 1
-	`, model.MediaAvailable, minFaces, user.ID)
 	return scanRecord(row)
 }
 
