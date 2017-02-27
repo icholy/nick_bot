@@ -77,7 +77,6 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-
 }
 
 func startBot(store *imgstore.Store) error {
