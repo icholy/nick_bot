@@ -62,12 +62,19 @@ func DrawFaces(base image.Image, rects []image.Rectangle) *image.NRGBA {
 
 func DetectFaces(i image.Image) []image.Rectangle {
 	var (
-		output  []image.Rectangle
-		cascade = opencv.LoadHaarClassifierCascade(*haarCascade)
-		faces   = cascade.DetectObjects(opencv.FromImage(i), *minNeighboor)
+		output   []image.Rectangle
+		cascade  = opencv.LoadHaarClassifierCascade(*haarCascade)
+		faces    = cascade.DetectObjects(opencv.FromImage(i), *minNeighboor)
+		imgWidth = i.Bounds().Dx()
 	)
 	defer cascade.Release()
 	for _, face := range faces {
+
+		// skip really big faces
+		if face.Width() > imgWidth/4 {
+			continue
+		}
+
 		output = append(output, image.Rectangle{
 			Min: image.Point{face.X(), face.Y()},
 			Max: image.Point{face.X() + face.Width(), face.Y() + face.Height()},
