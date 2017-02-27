@@ -9,8 +9,10 @@ type SearchStrategy int
 const (
 	MostFacesGlobalStrategy SearchStrategy = iota
 	MostLikesGlobalStrategy
+	MostScoreGlobalStrategy
 	MostFacesUserStrategy
 	MostLikesUserStrategy
+	MostScoreUserStrategy
 )
 
 func (s SearchStrategy) String() string {
@@ -19,10 +21,14 @@ func (s SearchStrategy) String() string {
 		return "MostFacesGlobal"
 	case MostLikesGlobalStrategy:
 		return "MostLikesGlobal"
+	case MostScoreGlobalStrategy:
+		return "MostScoreGlobal"
 	case MostFacesUserStrategy:
 		return "MostFacesUser"
 	case MostLikesUserStrategy:
 		return "MostLikesUser"
+	case MostScoreUserStrategy:
+		return "MostScoreUser"
 	default:
 		return "invalid"
 	}
@@ -34,8 +40,10 @@ var strategies = []struct {
 }{
 	{10, MostFacesGlobalStrategy},
 	{10, MostLikesGlobalStrategy},
-	{40, MostFacesUserStrategy},
-	{40, MostLikesUserStrategy},
+	{10, MostScoreGlobalStrategy},
+	{30, MostFacesUserStrategy},
+	{20, MostLikesUserStrategy},
+	{20, MostScoreUserStrategy},
 }
 
 func init() {

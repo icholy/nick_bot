@@ -19,10 +19,14 @@ func (s *Store) Search(minFaces int, strategy SearchStrategy) (*model.Record, er
 		return s.searchMostFacesGlobal(minFaces)
 	case MostLikesGlobalStrategy:
 		return s.searchMostLikesGlobal(minFaces)
+	case MostScoreGlobalStrategy:
+		return s.searchMostScoreGlobal(minFaces)
 	case MostLikesUserStrategy:
 		return s.searchMostLikesUser(minFaces)
 	case MostFacesUserStrategy:
 		return s.searchMostFacesUser(minFaces)
+	case MostScoreUserStrategy:
+		return s.searchMostScoreUser(minFaces)
 	default:
 		return nil, errors.New("strategy not implemented")
 	}
@@ -104,4 +108,34 @@ func (s *Store) randomUserWithPhotos(minFaces int) (*model.User, error) {
 		return nil, err
 	}
 	return &u, nil
+}
+
+func (s *Store) searchMostScoreUser(minFaces int) (*model.Record, error) {
+	user, err := s.randomUserWithPhotos(minFaces)
+	if err != nil {
+		return nil, err
+	}
+	s.m.Lock()
+	defer s.m.Unlock()
+	row := s.db.QueryRow(`
+		SELECT *
+		FROM media
+		WHERE state = ? AND face_count >= ? AND user_id = ?
+		ORDER BY like_count * face_count DESC
+		LIMIT 1
+	`, model.MediaAvailable, minFaces, user.ID)
+	return scanRecord(row)
+}
+
+func (s *Store) searchMostScoreGlobal(minFaces int) (*model.Record, error) {
+	s.m.Lock()
+	defer s.m.Unlock()
+	row := s.db.QueryRow(`
+		SELECT *
+		FROM media
+		WHERE state = ? AND face_count >= ?
+		ORDER BY like_count * face_count DESC
+		LIMIT 1
+	`, model.MediaAvailable, minFaces)
+	return scanRecord(row)
 }
