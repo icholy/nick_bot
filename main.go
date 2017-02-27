@@ -74,32 +74,34 @@ func main() {
 	}
 	defer store.Close()
 
-	if *resetStore {
+	switch {
+	case *resetStore:
 		if err := store.ResetStates(); err != nil {
 			log.Fatal(err)
 		}
-		return
-	}
-
-	if *testimg != "" {
+	case *testimg != "":
 		if err := testImage(*testimg, os.Stdout); err != nil {
 			log.Fatal(err)
 		}
-		return
-	}
-
-	if *testdir != "" {
+	case *testdir != "":
 		if err := testImageDir(*testdir); err != nil {
 			log.Fatal(err)
 		}
-		return
+	default:
+		if err := startBot(store); err != nil {
+			log.Fatal(err)
+		}
 	}
+
+}
+
+func startBot(store *imgstore.Store) error {
 
 	fmt.Println(banner)
 
 	captions, err := readLines("captions.txt")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	shuffle(captions)
 
@@ -112,7 +114,7 @@ func main() {
 		Store:    store,
 	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	go bot.Run()
 
@@ -129,7 +131,7 @@ func main() {
 	switch {
 	case *postNow:
 		doPost()
-		return
+		return nil
 	case *postInterval != 0:
 		for {
 			doPost()
@@ -143,6 +145,8 @@ func main() {
 	default:
 		select {}
 	}
+
+	return nil
 }
 
 func startHTTPServer(bot *facebot.Bot, store *imgstore.Store) {
