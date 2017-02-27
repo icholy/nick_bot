@@ -7,28 +7,28 @@ import (
 type SearchStrategy int
 
 const (
-	MostFacesGlobalStrategy SearchStrategy = iota
-	MostLikesGlobalStrategy
-	MostScoreGlobalStrategy
-	MostFacesUserStrategy
-	MostLikesUserStrategy
-	MostScoreUserStrategy
+	FacesGlobalStrategy SearchStrategy = iota
+	LikesGlobalStrategy
+	ScoreGlobalStrategy
+	FacesUserStrategy
+	LikesUserStrategy
+	ScoreUserStrategy
 )
 
 func (s SearchStrategy) String() string {
 	switch s {
-	case MostFacesGlobalStrategy:
-		return "MostFacesGlobal"
-	case MostLikesGlobalStrategy:
-		return "MostLikesGlobal"
-	case MostScoreGlobalStrategy:
-		return "MostScoreGlobal"
-	case MostFacesUserStrategy:
-		return "MostFacesUser"
-	case MostLikesUserStrategy:
-		return "MostLikesUser"
-	case MostScoreUserStrategy:
-		return "MostScoreUser"
+	case FacesGlobalStrategy:
+		return "FacesGlobal"
+	case LikesGlobalStrategy:
+		return "LikesGlobal"
+	case ScoreGlobalStrategy:
+		return "ScoreGlobal"
+	case FacesUserStrategy:
+		return "FacesUser"
+	case LikesUserStrategy:
+		return "LikesUser"
+	case ScoreUserStrategy:
+		return "ScoreUser"
 	default:
 		return "invalid"
 	}
@@ -38,12 +38,12 @@ var strategies = []struct {
 	P int
 	S SearchStrategy
 }{
-	{10, MostFacesGlobalStrategy},
-	{10, MostLikesGlobalStrategy},
-	{10, MostScoreGlobalStrategy},
-	{30, MostFacesUserStrategy},
-	{20, MostLikesUserStrategy},
-	{20, MostScoreUserStrategy},
+	{10, FacesGlobalStrategy},
+	{10, LikesGlobalStrategy},
+	{10, ScoreGlobalStrategy},
+	{30, FacesUserStrategy},
+	{20, LikesUserStrategy},
+	{20, ScoreUserStrategy},
 }
 
 func init() {

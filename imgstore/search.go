@@ -15,24 +15,24 @@ func (s *Store) SearchRandom(minFaces int) (*model.Record, error) {
 
 func (s *Store) Search(minFaces int, strategy SearchStrategy) (*model.Record, error) {
 	switch strategy {
-	case MostFacesGlobalStrategy:
-		return s.searchMostFacesGlobal(minFaces)
-	case MostLikesGlobalStrategy:
-		return s.searchMostLikesGlobal(minFaces)
-	case MostScoreGlobalStrategy:
-		return s.searchMostScoreGlobal(minFaces)
-	case MostLikesUserStrategy:
-		return s.searchMostLikesUser(minFaces)
-	case MostFacesUserStrategy:
-		return s.searchMostFacesUser(minFaces)
-	case MostScoreUserStrategy:
-		return s.searchMostScoreUser(minFaces)
+	case FacesGlobalStrategy:
+		return s.searchFacesGlobal(minFaces)
+	case LikesGlobalStrategy:
+		return s.searchLikesGlobal(minFaces)
+	case ScoreGlobalStrategy:
+		return s.searchScoreGlobal(minFaces)
+	case LikesUserStrategy:
+		return s.searchLikesUser(minFaces)
+	case FacesUserStrategy:
+		return s.searchFacesUser(minFaces)
+	case ScoreUserStrategy:
+		return s.searchScoreUser(minFaces)
 	default:
 		return nil, errors.New("strategy not implemented")
 	}
 }
 
-func (s *Store) searchMostFacesGlobal(minFaces int) (*model.Record, error) {
+func (s *Store) searchFacesGlobal(minFaces int) (*model.Record, error) {
 	s.m.Lock()
 	defer s.m.Unlock()
 	row := s.db.QueryRow(`
@@ -45,7 +45,7 @@ func (s *Store) searchMostFacesGlobal(minFaces int) (*model.Record, error) {
 	return scanRecord(row)
 }
 
-func (s *Store) searchMostLikesGlobal(minFaces int) (*model.Record, error) {
+func (s *Store) searchLikesGlobal(minFaces int) (*model.Record, error) {
 	s.m.Lock()
 	defer s.m.Unlock()
 	row := s.db.QueryRow(`
@@ -58,7 +58,7 @@ func (s *Store) searchMostLikesGlobal(minFaces int) (*model.Record, error) {
 	return scanRecord(row)
 }
 
-func (s *Store) searchMostLikesUser(minFaces int) (*model.Record, error) {
+func (s *Store) searchLikesUser(minFaces int) (*model.Record, error) {
 	user, err := s.randomUserWithPhotos(minFaces)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (s *Store) searchMostLikesUser(minFaces int) (*model.Record, error) {
 	return scanRecord(row)
 }
 
-func (s *Store) searchMostFacesUser(minFaces int) (*model.Record, error) {
+func (s *Store) searchFacesUser(minFaces int) (*model.Record, error) {
 	user, err := s.randomUserWithPhotos(minFaces)
 	if err != nil {
 		return nil, err
@@ -92,7 +92,7 @@ func (s *Store) searchMostFacesUser(minFaces int) (*model.Record, error) {
 	return scanRecord(row)
 }
 
-func (s *Store) searchMostScoreUser(minFaces int) (*model.Record, error) {
+func (s *Store) searchScoreUser(minFaces int) (*model.Record, error) {
 	user, err := s.randomUserWithPhotos(minFaces)
 	if err != nil {
 		return nil, err
@@ -109,7 +109,7 @@ func (s *Store) searchMostScoreUser(minFaces int) (*model.Record, error) {
 	return scanRecord(row)
 }
 
-func (s *Store) searchMostScoreGlobal(minFaces int) (*model.Record, error) {
+func (s *Store) searchScoreGlobal(minFaces int) (*model.Record, error) {
 	s.m.Lock()
 	defer s.m.Unlock()
 	row := s.db.QueryRow(`
