@@ -119,7 +119,7 @@ func startBot(store *imgstore.Store) error {
 	go bot.Run()
 
 	if *httpport != "" {
-		startHTTPServer(bot, store)
+		go runHTTPServer(bot, store)
 	}
 
 	doPost := func() {
@@ -149,7 +149,7 @@ func startBot(store *imgstore.Store) error {
 	return nil
 }
 
-func startHTTPServer(bot *facebot.Bot, store *imgstore.Store) {
+func runHTTPServer(bot *facebot.Bot, store *imgstore.Store) {
 	http.HandleFunc("/demo", func(w http.ResponseWriter, r *http.Request) {
 		img, err := bot.Demo()
 		if err != nil {
@@ -174,9 +174,7 @@ func startHTTPServer(bot *facebot.Bot, store *imgstore.Store) {
 			return
 		}
 	})
-	go func() {
-		if err := http.ListenAndServe(*httpport, nil); err != nil {
-			log.Printf("error: %s\n", err)
-		}
-	}()
+	if err := http.ListenAndServe(*httpport, nil); err != nil {
+		log.Printf("error: %s\n", err)
+	}
 }
