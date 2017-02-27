@@ -48,7 +48,7 @@ func (s *Store) initDatabase() error {
 			posted_at   INTEGER,
 			state       INTEGER
 		);
-		CREATE INDEC IF NOT EXISTS media_id_idx ON media (media_id);
+		CREATE INDEX IF NOT EXISTS media_id_idx ON media (media_id);
 		COMMIT;
 	`)
 	return err
