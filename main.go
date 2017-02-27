@@ -36,7 +36,7 @@ var (
 
 	postNow      = flag.Bool("post.now", false, "post and exit")
 	postInterval = flag.Duration("post.interval", 0, "how often to post")
-	postTimes    times
+	postTimes    stringFlags
 )
 
 var banner = `
@@ -52,14 +52,14 @@ func init() {
 	flag.Var(&postTimes, "post.time", "time to post")
 }
 
-type times []string
+type stringFlags []string
 
-func (t *times) String() string {
-	return fmt.Sprint(*t)
+func (sf *stringFlags) String() string {
+	return fmt.Sprint(*sf)
 }
 
-func (t *times) Set(value string) error {
-	*t = append(*t, value)
+func (sf *stringFlags) Set(value string) error {
+	*sf = append(*sf, value)
 	return nil
 }
 
