@@ -21,6 +21,8 @@ func (s *Store) Search(minFaces int, strategy SearchStrategy) (*model.Record, er
 		return s.searchMostLikesGlobal(minFaces)
 	case MostLikesUserStrategy:
 		return s.searchMostLikesUser(minFaces)
+	case MostFacesUserStrategy:
+		return s.searchMostFacesUser(minFaces)
 	default:
 		return nil, errors.New("strategy not implemented")
 	}
