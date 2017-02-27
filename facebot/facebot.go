@@ -81,12 +81,11 @@ func (b *Bot) handleMedia(m *model.Media) error {
 	faces := faceutil.DetectFaces(img)
 
 	// write to store
-	rec := &model.Record{
+	return b.store.Put(&model.Record{
 		Media:     *m,
 		FaceCount: len(faces),
 		State:     model.MediaAvailable,
-	}
-	return b.store.Put(rec)
+	})
 }
 
 func (b *Bot) Post() error {
