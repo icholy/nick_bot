@@ -2,52 +2,15 @@ package imgstore
 
 import (
 	"errors"
-	"math/rand"
+	"log"
 
 	"github.com/icholy/nick_bot/model"
 )
 
-type SearchStrategy int
-
-const (
-	MostFacesGlobalStrategy SearchStrategy = iota
-	MostLikesGlobalStrategy
-	MostFacesUserStrategy
-	MostLikesUserStrategy
-)
-
-var strategies = []struct {
-	P int
-	S SearchStrategy
-}{
-	{10, MostFacesGlobalStrategy},
-	{10, MostLikesGlobalStrategy},
-	{40, MostFacesUserStrategy},
-	{40, MostLikesUserStrategy},
-}
-
-func init() {
-	var total int
-	for _, s := range strategies {
-		total += s.P
-	}
-	if total != 100 {
-		panic("strategy probabilities don't total 100")
-	}
-}
-
-func (s *Store) selectStrategy() SearchStrategy {
-	var (
-		prob  = rand.Intn(100)
-		total int
-	)
-	for _, strategy := range strategies {
-		total += strategy.P
-		if prob <= total {
-			return strategy.S
-		}
-	}
-	panic("should never happen")
+func (s *Store) SearchRandom(minFaces int) (*model.Record, error) {
+	strategy := ChooseStrategy()
+	log.Printf("imgstore: using %s strategy\n", strategy)
+	return s.Search(minFaces, strategy)
 }
 
 func (s *Store) Search(minFaces int, strategy SearchStrategy) (*model.Record, error) {
@@ -61,11 +24,6 @@ func (s *Store) Search(minFaces int, strategy SearchStrategy) (*model.Record, er
 	default:
 		return nil, errors.New("strategy not implemented")
 	}
-}
-
-func (s *Store) SearchRandom(minFaces int) (*model.Record, error) {
-	strategy := s.selectStrategy()
-	return s.Search(minFaces, strategy)
 }
 
 func (s *Store) searchMostFacesGlobal(minFaces int) (*model.Record, error) {
