@@ -86,7 +86,6 @@ func (b *Bot) handleMedia(m *model.Media) error {
 		FaceCount: len(faces),
 		State:     model.MediaAvailable,
 	}
-	log.Printf("bot: found %s\n", rec)
 	return b.store.Put(rec)
 }
 
