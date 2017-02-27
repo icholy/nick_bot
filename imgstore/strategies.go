@@ -10,9 +10,11 @@ const (
 	FacesGlobalStrategy SearchStrategy = iota
 	LikesGlobalStrategy
 	ScoreGlobalStrategy
+	RandomGlobalStrategy
 	FacesUserStrategy
 	LikesUserStrategy
 	ScoreUserStrategy
+	RandomUserStrategy
 )
 
 func (s SearchStrategy) String() string {
@@ -23,12 +25,16 @@ func (s SearchStrategy) String() string {
 		return "LikesGlobal"
 	case ScoreGlobalStrategy:
 		return "ScoreGlobal"
+	case RandomGlobalStrategy:
+		return "RandomGlobal"
 	case FacesUserStrategy:
 		return "FacesUser"
 	case LikesUserStrategy:
 		return "LikesUser"
 	case ScoreUserStrategy:
 		return "ScoreUser"
+	case RandomUserStrategy:
+		return "RandomUser"
 	default:
 		return "invalid"
 	}
@@ -41,9 +47,11 @@ var strategies = []struct {
 	{10, FacesGlobalStrategy},
 	{10, LikesGlobalStrategy},
 	{10, ScoreGlobalStrategy},
-	{30, FacesUserStrategy},
+	{5, RandomGlobalStrategy},
+	{20, FacesUserStrategy},
 	{20, LikesUserStrategy},
 	{20, ScoreUserStrategy},
+	{5, RandomUserStrategy},
 }
 
 func init() {
