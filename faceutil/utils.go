@@ -4,14 +4,24 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"math"
 )
 
-func addRectPadding(pct float64, rect image.Rectangle) image.Rectangle {
-	width := float64(rect.Max.X - rect.Min.X)
-	height := float64(rect.Max.Y - rect.Min.Y)
+func addRectPadding(pct float64, rect image.Rectangle, bounds image.Rectangle) image.Rectangle {
+	var (
+		width  = float64(rect.Dx())
+		height = float64(rect.Dy())
 
-	widthPadding := int(pct * (width / 100) / 2)
-	heightPadding := int(pct * (height / 100) / 2)
+		boundsWidth  = float64(bounds.Dx())
+		boundsHeight = float64(bounds.Dx())
+
+		widthScale  = (1.0 / (width / boundsWidth)) / boundsWidth
+		heightScale = (1.0 / (height / boundsHeight)) / boundsHeight
+		scale       = math.Min(widthScale, heightScale)
+
+		widthPadding  = int(scale * pct * (width / 100) / 2)
+		heightPadding = int(scale * pct * (height / 100) / 2)
+	)
 
 	return image.Rect(
 		rect.Min.X-widthPadding,

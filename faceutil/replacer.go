@@ -30,7 +30,7 @@ func DrawFace(canvas *image.NRGBA, faceRect image.Rectangle) *image.NRGBA {
 		srcFaceImg = randomFace()
 
 		// add padding around detected face rect
-		paddedRect = addRectPadding(*margin, faceRect)
+		paddedRect = addRectPadding(*margin, faceRect, canvas.Bounds())
 
 		// resize the face image to fit inside the padded rect
 		faceImg = imaging.Resize(srcFaceImg, paddedRect.Dx(), 0, imaging.Lanczos)
@@ -62,19 +62,12 @@ func DrawFaces(base image.Image, rects []image.Rectangle) *image.NRGBA {
 
 func DetectFaces(i image.Image) []image.Rectangle {
 	var (
-		output   []image.Rectangle
-		cascade  = opencv.LoadHaarClassifierCascade(*haarCascade)
-		faces    = cascade.DetectObjects(opencv.FromImage(i), *minNeighboor)
-		imgWidth = i.Bounds().Dx()
+		output  []image.Rectangle
+		cascade = opencv.LoadHaarClassifierCascade(*haarCascade)
+		faces   = cascade.DetectObjects(opencv.FromImage(i), *minNeighboor)
 	)
 	defer cascade.Release()
 	for _, face := range faces {
-
-		// skip really big faces
-		if face.Width() > imgWidth/4 {
-			continue
-		}
-
 		output = append(output, image.Rectangle{
 			Min: image.Point{face.X(), face.Y()},
 			Max: image.Point{face.X() + face.Width(), face.Y() + face.Height()},
