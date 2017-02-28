@@ -4,6 +4,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"log"
 	"math"
 )
 
@@ -12,15 +13,24 @@ func addRectPadding(pct float64, rect image.Rectangle, bounds image.Rectangle) i
 		width  = float64(rect.Dx())
 		height = float64(rect.Dy())
 
-		boundsWidth  = float64(bounds.Dx())
-		boundsHeight = float64(bounds.Dx())
+		minScale    = 0.1
+		widthScale  = math.Max(1.0-(height/float64(bounds.Dx()))-0.3, minScale)
+		heightScale = math.Max(1.0-(width/float64(bounds.Dy()))-0.3, minScale)
 
-		widthScale  = (1.0 / (width / boundsWidth)) / boundsWidth
-		heightScale = (1.0 / (height / boundsHeight)) / boundsHeight
-		scale       = math.Min(widthScale, heightScale)
+		widthPadding  = int(widthScale * pct * (width / 100) / 2)
+		heightPadding = int(heightScale * pct * (height / 100) / 2)
+	)
 
-		widthPadding  = int(scale * pct * (width / 100) / 2)
-		heightPadding = int(scale * pct * (height / 100) / 2)
+	log.Printf(
+		"rect: (%f x %f), bounds: (%d, %d), scale: (%f, %f), padding: (%d x %d)\n",
+		width,
+		height,
+		bounds.Dx(),
+		bounds.Dx(),
+		widthScale,
+		heightScale,
+		widthPadding,
+		heightPadding,
 	)
 
 	return image.Rect(
