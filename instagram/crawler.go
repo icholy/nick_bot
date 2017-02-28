@@ -3,7 +3,6 @@ package instagram
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"time"
 
 	"github.com/icholy/nick_bot/model"
@@ -14,8 +13,8 @@ type Crawler struct {
 	password string
 	interval time.Duration
 
-	usersCache   []*model.User
-	usersUpdated time.Time
+	users     []*model.User
+	userIndex int
 
 	out  chan *model.Media
 	stop chan struct{}
@@ -53,7 +52,7 @@ func (c *Crawler) crawl() error {
 		return err
 	}
 	defer s.Close()
-	user, err := c.getRandomUser(s)
+	user, err := c.getNextUser(s)
 	if err != nil {
 		return err
 	}
@@ -67,22 +66,22 @@ func (c *Crawler) crawl() error {
 	return nil
 }
 
-func (c *Crawler) getRandomUser(s *Session) (*model.User, error) {
+func (c *Crawler) getNextUser(s *Session) (*model.User, error) {
 
-	// update the user cache if it's been over an hour
-	if c.usersUpdated.IsZero() || time.Since(c.usersUpdated) > time.Hour {
+	// fetch the users again if we've used them all or there are none
+	if c.userIndex >= len(c.users) {
 		users, err := s.GetUsers()
 		if err != nil {
 			return nil, err
 		}
-		c.usersCache = users
-		c.usersUpdated = time.Now()
+		c.users = users
 	}
 
-	// select a random user
-	if len(c.usersCache) == 0 {
-		return nil, fmt.Errorf("no users found")
+	if len(c.users) == 0 {
+		return nil, fmt.Errorf("no users")
 	}
-	index := rand.Intn(len(c.usersCache))
-	return c.usersCache[index], nil
+
+	user := c.users[c.userIndex]
+	c.userIndex++
+	return user, nil
 }
