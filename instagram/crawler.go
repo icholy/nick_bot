@@ -60,6 +60,7 @@ func (c *Crawler) crawl() error {
 	if err != nil {
 		return err
 	}
+	log.Printf("crawler: found %d media item(s) for %s\n", len(medias), user.Name)
 	for _, media := range medias {
 		c.out <- media
 	}
