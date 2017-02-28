@@ -68,13 +68,18 @@ func (b *Bot) Run() {
 }
 
 func (b *Bot) handleMedia(m *model.Media) error {
-
-	// make sure we haven't already processed this one
-	skip, err := b.store.Has(m.ID)
-	if skip || err != nil {
+	exists, err := b.store.Has(m.ID)
+	if err != nil {
 		return err
 	}
+	if exists {
+		return b.handleExistingMedia(m)
+	} else {
+		return b.handleNewMedia(m)
+	}
+}
 
+func (b *Bot) handleNewMedia(m *model.Media) error {
 	// download image
 	img, err := fetchImage(m.URL)
 	if err != nil {
@@ -90,6 +95,10 @@ func (b *Bot) handleMedia(m *model.Media) error {
 		FaceCount: len(faces),
 		State:     model.MediaAvailable,
 	})
+}
+
+func (b *Bot) handleExistingMedia(m *model.Media) error {
+	return nil
 }
 
 func (b *Bot) Post() error {
