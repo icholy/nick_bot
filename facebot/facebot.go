@@ -99,7 +99,7 @@ func (b *Bot) Post() error {
 
 	// try to post it
 	if err := b.postRecord(rec); err != nil {
-		log.Println("bot: %s", err)
+		log.Printf("bot: %s\n", err)
 		return b.store.SetState(rec.ID, model.MediaRejected)
 	} else {
 		return b.store.SetState(rec.ID, model.MediaUsed)
