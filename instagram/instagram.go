@@ -95,6 +95,22 @@ func (s *Session) GetUsers() ([]*model.User, error) {
 	return users, nil
 }
 
+func (s *Session) GetUserDetails(userID string) (*model.UserDetails, error) {
+	resp, err := s.insta.GetUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+	u := resp.User
+	return &model.UserDetails{
+		User: model.User{
+			ID:   userID,
+			Name: u.Username,
+		},
+		RealName:      u.FullName,
+		FollowerCount: u.FollowerCount,
+	}, nil
+}
+
 func (s *Session) UploadPhoto(imgPath string, caption string) error {
 	resp, err := s.insta.UploadPhoto(imgPath, caption, s.insta.NewUploadID(), 100, 0)
 	if err != nil {

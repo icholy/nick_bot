@@ -10,6 +10,12 @@ type User struct {
 	Name string
 }
 
+type UserDetails struct {
+	User
+	RealName      string
+	FollowerCount int
+}
+
 type Media struct {
 	ID        string
 	URL       string
