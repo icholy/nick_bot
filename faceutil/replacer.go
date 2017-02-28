@@ -4,6 +4,7 @@ import (
 	"flag"
 	"image"
 	"image/color"
+	"sort"
 
 	"github.com/disintegration/imaging"
 	"github.com/lazywei/go-opencv/opencv"
@@ -73,6 +74,7 @@ func DetectFaces(i image.Image) []image.Rectangle {
 			Max: image.Point{face.X() + face.Width(), face.Y() + face.Height()},
 		})
 	}
+	sort.Sort(ByCenterY(output))
 	return output
 }
 

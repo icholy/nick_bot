@@ -8,6 +8,24 @@ import (
 	"math"
 )
 
+type ByCenterY []image.Rectangle
+
+func (b ByCenterY) Len() int {
+	return len(b)
+}
+
+func (b ByCenterY) Swap(i, j int) {
+	b[i], b[j] = b[j], b[i]
+}
+
+func (b ByCenterY) Less(i, j int) bool {
+	var (
+		p1 = getRectCenter(b[i])
+		p2 = getRectCenter(b[j])
+	)
+	return p1.Y < p2.Y
+}
+
 func addRectPadding(pct float64, rect image.Rectangle, bounds image.Rectangle) image.Rectangle {
 	var (
 		width  = float64(rect.Dx())
