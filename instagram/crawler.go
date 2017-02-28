@@ -3,6 +3,7 @@ package instagram
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"time"
 
 	"github.com/icholy/nick_bot/model"
@@ -11,7 +12,6 @@ import (
 type Crawler struct {
 	username string
 	password string
-	interval time.Duration
 
 	users     []*model.User
 	userIndex int
@@ -24,7 +24,6 @@ func NewCrawler(username, password string) *Crawler {
 	c := &Crawler{
 		username: username,
 		password: password,
-		interval: 10 * time.Minute,
 
 		out:  make(chan *model.Media),
 		stop: make(chan struct{}),
@@ -42,7 +41,8 @@ func (c *Crawler) loop() {
 		if err := c.crawl(); err != nil {
 			log.Printf("crawler: %s\n", err)
 		}
-		time.Sleep(c.interval)
+		// sleep up to 30 minutes
+		time.Sleep(time.Minute * time.Duration(rand.Intn(30)))
 	}
 }
 
@@ -75,6 +75,7 @@ func (c *Crawler) getNextUser(s *Session) (*model.User, error) {
 		if err != nil {
 			return nil, err
 		}
+		shuffelUsers(users)
 		c.users = users
 	}
 

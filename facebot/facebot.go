@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"math/rand"
 	"path/filepath"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -60,6 +62,8 @@ func (b *Bot) Run() {
 		if err := b.handleMedia(media); err != nil {
 			log.Printf("bot: %s\n", err)
 		}
+		// sleep up to a minute between image requests
+		time.Sleep(time.Second * time.Duration(rand.Intn(60)))
 	}
 }
 
