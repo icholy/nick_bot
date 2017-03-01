@@ -20,7 +20,7 @@ var (
 	shouldDrawRects = flag.Bool("draw.rects", false, "Show the detection rectangles")
 )
 
-func DrawFace(canvas *image.NRGBA, faceRect image.Rectangle) *image.NRGBA {
+func DrawFace(canvas *image.NRGBA, faceRect image.Rectangle, primary bool) *image.NRGBA {
 	var (
 		// rect colors
 		red   = color.RGBA{255, 0, 0, 255}
@@ -28,7 +28,7 @@ func DrawFace(canvas *image.NRGBA, faceRect image.Rectangle) *image.NRGBA {
 		blue  = color.RGBA{0, 0, 255, 255}
 
 		// select a random source face
-		srcFaceImg = randomFace()
+		srcFaceImg = randomFace(primary)
 
 		// add padding around detected face rect
 		paddedRect = addRectPadding(*margin, faceRect, canvas.Bounds())
@@ -54,9 +54,12 @@ func DrawFace(canvas *image.NRGBA, faceRect image.Rectangle) *image.NRGBA {
 }
 
 func DrawFaces(base image.Image, rects []image.Rectangle) *image.NRGBA {
-	canvas := canvasFromImage(base)
+	var (
+		canvas     = canvasFromImage(base)
+		usePrimary = len(rects) < 3
+	)
 	for _, faceRect := range rects {
-		canvas = DrawFace(canvas, faceRect)
+		canvas = DrawFace(canvas, faceRect, usePrimary)
 	}
 	return canvas
 }

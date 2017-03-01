@@ -17,12 +17,28 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-var faceList []image.Image
+var (
+	primaryFaceList []image.Image
+	allFaceList     []image.Image
+)
 
 func LoadFaces(dir string) error {
 	var err error
-	faceList, err = loadFaces(dir)
-	return err
+	primaryFaceList, err = loadFaces(filepath.Join(dir, "primary"))
+	if err != nil {
+		return err
+	}
+	secondayFaceList, err := loadFaces(filepath.Join(dir, "seconday"))
+	if err != nil {
+		return err
+	}
+	for _, face := range primaryFaceList {
+		allFaceList = append(allFaceList, face)
+	}
+	for _, face := range secondayFaceList {
+		allFaceList = append(allFaceList, face)
+	}
+	return nil
 }
 
 func MustLoadFaces(dir string) {
@@ -63,9 +79,15 @@ func loadImage(file string) (image.Image, error) {
 	return m, nil
 }
 
-func randomFace() image.Image {
-	i := rand.Intn(len(faceList))
-	face := faceList[i]
+func randomFace(primary bool) image.Image {
+	var faces []image.Image
+	if primary {
+		faces = primaryFaceList
+	} else {
+		faces = allFaceList
+	}
+	i := rand.Intn(len(faces))
+	face := faces[i]
 	if rand.Intn(2) == 0 {
 		return imaging.FlipH(face)
 	}
