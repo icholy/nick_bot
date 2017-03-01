@@ -89,6 +89,7 @@ func (c *Crawler) getNextUser(s *Session) (*model.User, error) {
 }
 
 func (c *Crawler) autoFollow(s *Session, u *model.User) error {
+	log.Println("crawler: following %s\n", u)
 	followers, err := s.GetFollowers(u.ID)
 	if err != nil {
 		return err
