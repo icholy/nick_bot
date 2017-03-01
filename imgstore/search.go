@@ -37,7 +37,7 @@ func (s *Store) searchTopFaces(minFaces int) (*model.Record, error) {
 			FROM media
 			WHERE state = ? AND face_count >= ?
 			ORDER BY face_count DESC, like_count DESC
-			LIMIT 1
+			LIMIT 10
 		) ORDER BY RANDOM()
 		LIMIT 1
 	`, model.MediaAvailable, minFaces)
