@@ -185,6 +185,8 @@ func (b *Bot) followRandom(s *instagram.Session, userID string) error {
 		return nil
 	}
 
+	model.ShuffelUsers(users)
+
 	// follow 1-5 users
 	limit := rand.Intn(5) + 1
 	for i, u := range users {
