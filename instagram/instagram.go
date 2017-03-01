@@ -95,6 +95,35 @@ func (s *Session) GetUsers() ([]*model.User, error) {
 	return users, nil
 }
 
+func (s *Session) GetFollowers(userID string) ([]*model.User, error) {
+	resp, err := s.insta.UserFollowers(userID, "")
+	if err != nil {
+		return nil, err
+	}
+	if resp.Status != "ok" {
+		return nil, ErrInvalidResponseStatus
+	}
+	var users []*model.User
+	for _, u := range resp.Users {
+		users = append(users, &model.User{
+			ID:   u.StringID(),
+			Name: u.Username,
+		})
+	}
+	return users, nil
+}
+
+func (s *Session) Follow(userID string) error {
+	resp, err := s.insta.Follow(userID)
+	if err != nil {
+		return err
+	}
+	if resp.Status != "ok" {
+		return ErrInvalidResponseStatus
+	}
+	return nil
+}
+
 func (s *Session) GetUserDetails(userID string) (*model.UserDetails, error) {
 	resp, err := s.insta.GetUserID(userID)
 	if err != nil {
