@@ -64,7 +64,7 @@ func (c *Crawler) crawl() error {
 	for _, media := range medias {
 		c.out <- media
 	}
-	return c.autoFollow(s, user)
+	return nil
 }
 
 func (c *Crawler) getNextUser(s *Session) (*model.User, error) {
@@ -86,17 +86,4 @@ func (c *Crawler) getNextUser(s *Session) (*model.User, error) {
 	user := c.users[c.userIndex]
 	c.userIndex++
 	return user, nil
-}
-
-func (c *Crawler) autoFollow(s *Session, u *model.User) error {
-	log.Println("crawler: following %s\n", u)
-	followers, err := s.GetFollowers(u.ID)
-	if err != nil {
-		return err
-	}
-	if len(followers) == 0 {
-		return nil
-	}
-	user := followers[rand.Intn(len(followers))]
-	return s.Follow(user.ID)
 }

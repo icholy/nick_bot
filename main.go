@@ -23,14 +23,15 @@ import (
 )
 
 var (
-	username = flag.String("username", "", "instagram username")
-	password = flag.String("password", "", "instagram password")
-	minfaces = flag.Int("minfaces", 1, "minimum faces")
-	upload   = flag.Bool("upload", false, "enable photo uploading")
-	testimg  = flag.String("test.image", "", "test image")
-	testdir  = flag.String("test.dir", "", "test a directory of images")
-	facedir  = flag.String("face.dir", "faces", "directory to load faces from")
-	httpport = flag.String("http.port", "", "http port (example :8080)")
+	username   = flag.String("username", "", "instagram username")
+	password   = flag.String("password", "", "instagram password")
+	minfaces   = flag.Int("minfaces", 1, "minimum faces")
+	upload     = flag.Bool("upload", false, "enable photo uploading")
+	testimg    = flag.String("test.image", "", "test image")
+	testdir    = flag.String("test.dir", "", "test a directory of images")
+	facedir    = flag.String("face.dir", "faces", "directory to load faces from")
+	httpport   = flag.String("http.port", "", "http port (example :8080)")
+	autofollow = flag.Bool("autofollow", false, "auto follow random people")
 
 	resetStore = flag.Bool("reset.store", false, "mark all store records as available")
 	storefile  = flag.String("store", "store.db", "the store file")
@@ -90,12 +91,13 @@ func startBot(store *imgstore.Store) error {
 	shuffle(captions)
 
 	bot, err := facebot.New(&facebot.Options{
-		Username: *username,
-		Password: *password,
-		MinFaces: *minfaces,
-		Upload:   *upload,
-		Captions: captions,
-		Store:    store,
+		Username:   *username,
+		Password:   *password,
+		MinFaces:   *minfaces,
+		Upload:     *upload,
+		AutoFollow: *autofollow,
+		Captions:   captions,
+		Store:      store,
 	})
 	if err != nil {
 		return err

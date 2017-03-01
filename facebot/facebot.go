@@ -17,12 +17,13 @@ import (
 )
 
 type Options struct {
-	Username string
-	Password string
-	MinFaces int
-	Upload   bool
-	Captions []string
-	Store    *imgstore.Store
+	Username   string
+	Password   string
+	MinFaces   int
+	Upload     bool
+	AutoFollow bool
+	Captions   []string
+	Store      *imgstore.Store
 }
 
 type Bot struct {
@@ -165,5 +166,25 @@ func (b *Bot) postRecord(rec *model.Record) error {
 	}
 	defer session.Close()
 	caption := b.getCaption(rec)
-	return session.UploadPhoto(imgpath, caption)
+	if err := session.UploadPhoto(imgpath, caption); err != nil {
+		return err
+	}
+
+	if b.opt.AutoFollow {
+		return b.followRandom(session, rec.ID)
+	}
+	return nil
+}
+
+func (b *Bot) followRandom(s *instagram.Session, userID string) error {
+	followers, err := s.GetFollowers(userID)
+	if err != nil {
+		return err
+	}
+	if len(followers) == 0 {
+		return nil
+	}
+	user := followers[rand.Intn(len(followers))]
+	log.Println("bot: following %s\n", user)
+	return s.Follow(user.ID)
 }
