@@ -177,14 +177,27 @@ func (b *Bot) postRecord(rec *model.Record) error {
 }
 
 func (b *Bot) followRandom(s *instagram.Session, userID string) error {
-	followers, err := s.GetFollowers(userID)
+	users, err := s.GetFollowers(userID)
 	if err != nil {
 		return err
 	}
-	if len(followers) == 0 {
+	if len(users) == 0 {
 		return nil
 	}
-	user := followers[rand.Intn(len(followers))]
-	log.Println("bot: following %s\n", user)
-	return s.Follow(user.ID)
+
+	// follow 1-5 users
+	limit := rand.Intn(5) + 1
+	for i, u := range users {
+		if i > limit {
+			break
+		}
+		log.Println("bot: following %s\n", u)
+		if err := s.Follow(u.ID); err != nil {
+			return err
+		}
+
+		// sleep 1-10 seconds
+		time.Sleep(time.Second * time.Duration(rand.Intn(10)))
+	}
+	return nil
 }

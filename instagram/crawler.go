@@ -75,7 +75,7 @@ func (c *Crawler) getNextUser(s *Session) (*model.User, error) {
 		if err != nil {
 			return nil, err
 		}
-		shuffelUsers(users)
+		model.ShuffelUsers(users)
 		c.users = users
 	}
 
