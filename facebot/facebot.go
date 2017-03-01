@@ -181,10 +181,6 @@ func (b *Bot) followRandom(s *instagram.Session, userID string) error {
 	if err != nil {
 		return err
 	}
-	if len(users) == 0 {
-		return nil
-	}
-
 	model.ShuffelUsers(users)
 
 	// follow 1-10 users
