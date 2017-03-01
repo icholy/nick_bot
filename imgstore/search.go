@@ -15,46 +15,46 @@ func (s *Store) SearchRandom(minFaces int) (*model.Record, error) {
 
 func (s *Store) Search(minFaces int, strategy SearchStrategy) (*model.Record, error) {
 	switch strategy {
-	case FacesGlobalStrategy:
-		return s.searchFacesGlobal(minFaces)
-	case LikesGlobalStrategy:
-		return s.searchLikesGlobal(minFaces)
-	case ScoreGlobalStrategy:
-		return s.searchScoreGlobal(minFaces)
+	case TopFacesStrategy:
+		return s.searchTopFaces(minFaces)
+	case TopLikesStrategy:
+		return s.searchTopLikes(minFaces)
 	case LikesUserStrategy:
 		return s.searchLikesUser(minFaces)
 	case FacesUserStrategy:
 		return s.searchFacesUser(minFaces)
-	case ScoreUserStrategy:
-		return s.searchScoreUser(minFaces)
-	case RandomStrategy:
-		return s.searchRandom(minFaces)
 	default:
 		return nil, errors.New("strategy not implemented")
 	}
 }
 
-func (s *Store) searchFacesGlobal(minFaces int) (*model.Record, error) {
+func (s *Store) searchTopFaces(minFaces int) (*model.Record, error) {
 	s.m.Lock()
 	defer s.m.Unlock()
 	row := s.db.QueryRow(`
-		SELECT *
-		FROM media
-		WHERE state = ? AND face_count >= ?
-		ORDER BY face_count DESC, like_count DESC
+		SELECT * FROM (
+			SELECT *
+			FROM media
+			WHERE state = ? AND face_count >= ?
+			ORDER BY face_count DESC, like_count DESC
+			LIMIT 1
+		) ORDER BY RANDOM()
 		LIMIT 1
 	`, model.MediaAvailable, minFaces)
 	return scanRecord(row)
 }
 
-func (s *Store) searchLikesGlobal(minFaces int) (*model.Record, error) {
+func (s *Store) searchTopLikes(minFaces int) (*model.Record, error) {
 	s.m.Lock()
 	defer s.m.Unlock()
 	row := s.db.QueryRow(`
-		SELECT *
-		FROM media
-		WHERE state = ? AND face_count >= ?
-		ORDER BY like_count DESC, face_count DESC
+		SELECT * FROM (
+			SELECT *
+			FROM media
+			WHERE state = ? AND face_count >= ?
+			ORDER BY like_count DESC, face_count DESC
+			LIMIT 10
+		) ORDER BY RANDOM()
 		LIMIT 1
 	`, model.MediaAvailable, minFaces)
 	return scanRecord(row)
@@ -91,49 +91,6 @@ func (s *Store) searchFacesUser(minFaces int) (*model.Record, error) {
 		ORDER BY like_count DESC, face_count DESC
 		LIMIT 1
 	`, model.MediaAvailable, minFaces, user.ID)
-	return scanRecord(row)
-}
-
-func (s *Store) searchScoreUser(minFaces int) (*model.Record, error) {
-	user, err := s.randomUserWithPhotos(minFaces)
-	if err != nil {
-		return nil, err
-	}
-	s.m.Lock()
-	defer s.m.Unlock()
-	row := s.db.QueryRow(`
-		SELECT *
-		FROM media
-		WHERE state = ? AND face_count >= ? AND user_id = ?
-		ORDER BY like_count * face_count DESC
-		LIMIT 1
-	`, model.MediaAvailable, minFaces, user.ID)
-	return scanRecord(row)
-}
-
-func (s *Store) searchScoreGlobal(minFaces int) (*model.Record, error) {
-	s.m.Lock()
-	defer s.m.Unlock()
-	row := s.db.QueryRow(`
-		SELECT *
-		FROM media
-		WHERE state = ? AND face_count >= ?
-		ORDER BY like_count * face_count DESC
-		LIMIT 1
-	`, model.MediaAvailable, minFaces)
-	return scanRecord(row)
-}
-
-func (s *Store) searchRandom(minFaces int) (*model.Record, error) {
-	s.m.Lock()
-	defer s.m.Unlock()
-	row := s.db.QueryRow(`
-		SELECT *
-		FROM media
-		WHERE state = ? AND face_count >= ?
-		ORDER BY RANDOM()
-		LIMIT 1
-	`, model.MediaAvailable, minFaces)
 	return scanRecord(row)
 }
 
