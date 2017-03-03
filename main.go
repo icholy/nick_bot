@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jasonlvhit/gocron"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/robfig/cron"
 
 	"github.com/icholy/nick_bot/facebot"
 	"github.com/icholy/nick_bot/faceutil"
@@ -124,36 +124,20 @@ func startBot(store *imgstore.Store) error {
 			time.Sleep(*postInterval)
 		}
 	default:
-		schedule, err := loadSchedule("schedule.json")
+		lines, err := readLines("schedule.cron")
 		if err != nil {
 			log.Fatal(err)
 		}
-		for day, times := range schedule {
-			day = strings.ToLower(day)
-			for _, t := range times {
-				switch day {
-				case "monday":
-					gocron.Every(1).Monday().At(t).Do(doPost)
-				case "tuesday":
-					gocron.Every(1).Tuesday().At(t).Do(doPost)
-				case "wednesday":
-					gocron.Every(1).Wednesday().At(t).Do(doPost)
-				case "thursday":
-					gocron.Every(1).Thursday().At(t).Do(doPost)
-				case "friday":
-					gocron.Every(1).Friday().At(t).Do(doPost)
-				case "saturday":
-					gocron.Every(1).Saturday().At(t).Do(doPost)
-				case "sunday":
-					gocron.Every(1).Sunday().At(t).Do(doPost)
-				case "everyday":
-					gocron.Every(1).Day().At(t).Do(doPost)
-				default:
-					log.Fatalf("invalid schedule key: %s", day)
-				}
+		c := cron.New()
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if len(line) == 0 {
+				continue
 			}
+			c.AddFunc(line, doPost)
 		}
-		<-gocron.Start()
+		c.Start()
+		select {}
 	}
 
 	return nil

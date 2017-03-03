@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"image"
 	"image/jpeg"
 	_ "image/png"
@@ -76,17 +75,4 @@ func testImageDir(dir string) error {
 		}
 	}
 	return nil
-}
-
-func loadSchedule(file string) (map[string][]string, error) {
-	f, err := os.Open(file)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	var schedule map[string][]string
-	if err := json.NewDecoder(f).Decode(&schedule); err != nil {
-		return nil, err
-	}
-	return schedule, nil
 }
