@@ -56,7 +56,7 @@ func DrawFace(canvas *image.NRGBA, faceRect image.Rectangle, primary bool) *imag
 func DrawFaces(base image.Image, rects []image.Rectangle) *image.NRGBA {
 	var (
 		canvas     = canvasFromImage(base)
-		usePrimary = len(rects) < 3
+		usePrimary = len(rects) < 4
 	)
 	for _, faceRect := range rects {
 		canvas = DrawFace(canvas, faceRect, usePrimary)
