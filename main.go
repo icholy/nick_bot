@@ -109,9 +109,9 @@ func startBot(store *imgstore.Store) error {
 	}
 
 	doPost := func() {
-		log.Println("trying to post")
+		log.Infof("trying to post")
 		if err := bot.Post(); err != nil {
-			log.Printf("posting error: %s\n", err)
+			log.Errorf("posting: %s\n", err)
 		}
 	}
 
@@ -172,6 +172,6 @@ func runHTTPServer(bot *facebot.Bot, store *imgstore.Store) {
 		}
 	})
 	if err := http.ListenAndServe(*httpport, nil); err != nil {
-		log.Printf("error: %s\n", err)
+		log.Error(err)
 	}
 }

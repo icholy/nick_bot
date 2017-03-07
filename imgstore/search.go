@@ -9,7 +9,7 @@ import (
 
 func (s *Store) SearchRandom(minFaces int) (*model.Record, error) {
 	strategy := ChooseStrategy()
-	log.Printf("imgstore: using %s strategy\n", strategy)
+	log.Infof("imgstore: using %s strategy\n", strategy)
 	return s.Search(minFaces, strategy)
 }
 
