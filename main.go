@@ -127,7 +127,7 @@ func startBot(store *imgstore.Store) error {
 	default:
 		lines, err := readLines("schedule.cron")
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		c := cron.New()
 		for _, line := range lines {
@@ -135,7 +135,9 @@ func startBot(store *imgstore.Store) error {
 			if len(line) == 0 {
 				continue
 			}
-			c.AddFunc(line, doPost)
+			if err := c.AddFunc(line, doPost); err != nil {
+				return err
+			}
 		}
 		c.Start()
 		select {}
