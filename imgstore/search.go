@@ -2,9 +2,9 @@ package imgstore
 
 import (
 	"errors"
-	"log"
 
 	"github.com/icholy/nick_bot/model"
+	log "github.com/sirupsen/logrus"
 )
 
 func (s *Store) SearchRandom(minFaces int) (*model.Record, error) {

@@ -3,7 +3,6 @@ package faceutil
 import (
 	"image"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"os"
 	"path"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	"github.com/disintegration/imaging"
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {

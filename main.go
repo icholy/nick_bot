@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"image/jpeg"
 	_ "image/png"
-	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -15,6 +14,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/robfig/cron"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/icholy/nick_bot/facebot"
 	"github.com/icholy/nick_bot/faceutil"

@@ -2,11 +2,11 @@ package instagram
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"time"
 
 	"github.com/icholy/nick_bot/model"
+	log "github.com/sirupsen/logrus"
 )
 
 type Crawler struct {

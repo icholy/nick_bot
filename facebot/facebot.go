@@ -3,12 +3,12 @@ package facebot
 import (
 	"fmt"
 	"image"
-	"log"
 	"math/rand"
 	"path/filepath"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/icholy/nick_bot/faceutil"
 	"github.com/icholy/nick_bot/imgstore"
