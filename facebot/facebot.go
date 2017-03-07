@@ -195,7 +195,7 @@ func (b *Bot) followRandom(s *instagram.Session, userID string) error {
 		}
 
 		// sleep 1-10 seconds
-		time.Sleep(time.Second * time.Duration(rand.Intn(10)))
+		time.Sleep(time.Second * time.Duration(rand.Intn(10)+1))
 	}
 	return nil
 }
