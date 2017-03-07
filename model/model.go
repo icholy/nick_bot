@@ -11,7 +11,7 @@ type User struct {
 }
 
 func (u *User) String() string {
-	return u.Name
+	return fmt.Sprintf("@%s", u.Name)
 }
 
 type UserDetails struct {

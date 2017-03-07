@@ -191,7 +191,7 @@ func (b *Bot) followRandom(s *instagram.Session, userID string) error {
 		}
 		log.Println("bot: following %s\n", u)
 		if err := s.Follow(u.ID); err != nil {
-			return err
+			log.Printf("bot: error following %s\n", u)
 		}
 
 		// sleep 1-10 seconds
