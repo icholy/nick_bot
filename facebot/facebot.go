@@ -64,7 +64,7 @@ func (b *Bot) Run() {
 			log.Printf("bot: %s\n", err)
 		}
 		// sleep up to a minute between image requests
-		time.Sleep(time.Second * time.Duration(rand.Intn(60)))
+		time.Sleep(time.Second * time.Duration(rand.Intn(60)+1))
 	}
 }
 
