@@ -62,7 +62,7 @@ func (c *Crawler) crawl() error {
 	if err != nil {
 		return err
 	}
-	log.Debugf("crawler: found %d media item(s) for %s\n", len(medias), user.Name)
+	log.Debugf("crawler: found %d media item(s) for %s\n", len(medias), user)
 	for _, media := range medias {
 		c.out <- media
 	}
