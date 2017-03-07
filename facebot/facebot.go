@@ -61,7 +61,7 @@ func (b *Bot) Run() {
 	crawler := instagram.NewCrawler(b.opt.Username, b.opt.Password)
 	for media := range crawler.Media() {
 		if err := b.handleMedia(media); err != nil {
-			log.Errorf("bot: %s\n", err)
+			log.Errorf("bot: %s", err)
 		}
 		// sleep up to a minute between image requests
 		time.Sleep(time.Second * time.Duration(rand.Intn(60)+1))
@@ -109,11 +109,11 @@ func (b *Bot) Post() error {
 	if err != nil {
 		return err
 	}
-	log.Infof("bot: posting %s\n", rec)
+	log.Infof("bot: posting %s", rec)
 
 	// try to post it
 	if err := b.postRecord(rec); err != nil {
-		log.Errorf("bot: %s\n", err)
+		log.Errorf("bot: %s", err)
 		return b.store.SetState(rec.ID, model.MediaRejected)
 	} else {
 		return b.store.SetState(rec.ID, model.MediaUsed)
@@ -149,7 +149,7 @@ func (b *Bot) postRecord(rec *model.Record) error {
 
 	// save image
 	imgpath := filepath.Join("output", rec.ID+".jpeg")
-	log.Infof("bot: writing image %s\n", imgpath)
+	log.Infof("bot: writing image %s", imgpath)
 	if err := writeImage(imgpath, newImage); err != nil {
 		return err
 	}
@@ -189,9 +189,9 @@ func (b *Bot) followRandom(s *instagram.Session, userID string) error {
 		if i > limit {
 			break
 		}
-		log.Infof("bot: following %s\n", u)
+		log.Infof("bot: following %s", u)
 		if err := s.Follow(u.ID); err != nil {
-			log.Errorf("bot: following %s: %s\n", u, err)
+			log.Errorf("bot: following %s: %s", u, err)
 		}
 
 		// sleep 1-10 seconds

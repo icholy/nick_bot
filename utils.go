@@ -51,7 +51,7 @@ func testImage(imgfile string, w io.Writer) error {
 		return err
 	}
 	faces := faceutil.DetectFaces(baseImage)
-	log.Debugf("found %d face(s) in image\n", len(faces))
+	log.Debugf("found %d face(s) in image", len(faces))
 	newImage := faceutil.DrawFaces(baseImage, faces)
 	return jpeg.Encode(w, newImage, &jpeg.Options{Quality: jpeg.DefaultQuality})
 }

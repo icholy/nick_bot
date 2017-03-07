@@ -39,7 +39,7 @@ func (c *Crawler) Media() <-chan *model.Media {
 func (c *Crawler) loop() {
 	for {
 		if err := c.crawl(); err != nil {
-			log.Errorf("crawler: %s\n", err)
+			log.Errorf("crawler: %s", err)
 		}
 		// sleep up to 5-20 minutes
 		time.Sleep(
@@ -62,7 +62,7 @@ func (c *Crawler) crawl() error {
 	if err != nil {
 		return err
 	}
-	log.Debugf("crawler: found %d media item(s) for %s\n", len(medias), user)
+	log.Debugf("crawler: found %d media item(s) for %s", len(medias), user)
 	for _, media := range medias {
 		c.out <- media
 	}

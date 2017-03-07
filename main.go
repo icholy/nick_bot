@@ -127,7 +127,7 @@ func startBot(store *imgstore.Store) error {
 	doPost := func() {
 		log.Infof("trying to post")
 		if err := bot.Post(); err != nil {
-			log.Errorf("posting: %s\n", err)
+			log.Errorf("posting: %s", err)
 		}
 	}
 
