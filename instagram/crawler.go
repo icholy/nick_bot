@@ -41,9 +41,9 @@ func (c *Crawler) loop() {
 		if err := c.crawl(); err != nil {
 			log.Printf("crawler: %s\n", err)
 		}
-		// sleep up to 5-10 minutes
+		// sleep up to 5-20 minutes
 		time.Sleep(
-			5*time.Minute + time.Duration(rand.Intn(5))*time.Minute,
+			5*time.Minute + time.Duration(rand.Intn(15))*time.Minute,
 		)
 	}
 }
