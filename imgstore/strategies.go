@@ -32,8 +32,8 @@ var strategies = []struct {
 	P int
 	S SearchStrategy
 }{
-	{40, TopFacesStrategy},
-	{40, TopLikesStrategy},
+	{60, TopFacesStrategy},
+	{20, TopLikesStrategy},
 	{10, FacesUserStrategy},
 	{10, LikesUserStrategy},
 }
