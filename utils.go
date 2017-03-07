@@ -11,7 +11,7 @@ import (
 	"os"
 	"path/filepath"
 
-	log "github.com/sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/icholy/nick_bot/faceutil"
 )
@@ -51,7 +51,7 @@ func testImage(imgfile string, w io.Writer) error {
 		return err
 	}
 	faces := faceutil.DetectFaces(baseImage)
-	log.Infof("found %d face(s) in image\n", len(faces))
+	log.Debugf("found %d face(s) in image\n", len(faces))
 	newImage := faceutil.DrawFaces(baseImage, faces)
 	return jpeg.Encode(w, newImage, &jpeg.Options{Quality: jpeg.DefaultQuality})
 }

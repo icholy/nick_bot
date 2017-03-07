@@ -3,13 +3,13 @@ package imgstore
 import (
 	"errors"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/icholy/nick_bot/model"
-	log "github.com/sirupsen/logrus"
 )
 
 func (s *Store) SearchRandom(minFaces int) (*model.Record, error) {
 	strategy := ChooseStrategy()
-	log.Infof("imgstore: using %s strategy\n", strategy)
+	log.Debugf("imgstore: using %s strategy\n", strategy)
 	return s.Search(minFaces, strategy)
 }
 

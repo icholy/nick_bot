@@ -5,8 +5,8 @@ import (
 	"math/rand"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/icholy/nick_bot/model"
-	log "github.com/sirupsen/logrus"
 )
 
 type Crawler struct {
@@ -62,7 +62,7 @@ func (c *Crawler) crawl() error {
 	if err != nil {
 		return err
 	}
-	log.Infof("crawler: found %d media item(s) for %s\n", len(medias), user.Name)
+	log.Debugf("crawler: found %d media item(s) for %s\n", len(medias), user.Name)
 	for _, media := range medias {
 		c.out <- media
 	}

@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/disintegration/imaging"
-	log "github.com/sirupsen/logrus"
 )
 
 func init() {

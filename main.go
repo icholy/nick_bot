@@ -12,9 +12,10 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
+	"github.com/evalphobia/logrus_sentry"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/robfig/cron"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/icholy/nick_bot/facebot"
 	"github.com/icholy/nick_bot/faceutil"
@@ -32,6 +33,7 @@ var (
 	facedir    = flag.String("face.dir", "faces", "directory to load faces from")
 	httpport   = flag.String("http.port", "", "http port (example :8080)")
 	autofollow = flag.Bool("autofollow", false, "auto follow random people")
+	sentryDSN  = flag.String("sentry.dsn", "", "Sentry DSN")
 
 	resetStore = flag.Bool("reset.store", false, "mark all store records as available")
 	storefile  = flag.String("store", "store.db", "the store file")
@@ -51,6 +53,20 @@ var banner = `
 
 func main() {
 	flag.Parse()
+
+	log.SetLevel(log.DebugLevel)
+
+	if *sentryDSN != "" {
+		hook, err := logrus_sentry.NewSentryHook(*sentryDSN, []log.Level{
+			log.PanicLevel,
+			log.FatalLevel,
+			log.ErrorLevel,
+		})
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.AddHook(hook)
+	}
 
 	faceutil.MustLoadFaces(*facedir)
 

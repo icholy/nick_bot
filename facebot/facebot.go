@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	_ "github.com/mattn/go-sqlite3"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/icholy/nick_bot/faceutil"
 	"github.com/icholy/nick_bot/imgstore"
