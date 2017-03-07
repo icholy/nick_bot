@@ -171,7 +171,7 @@ func (b *Bot) postRecord(rec *model.Record) error {
 	}
 
 	if b.opt.AutoFollow {
-		return b.followRandom(session, rec.ID)
+		return b.followRandom(session, rec.UserID)
 	}
 	return nil
 }
