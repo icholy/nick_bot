@@ -141,7 +141,7 @@ func (s *Session) GetUserDetails(userID string) (*model.UserDetails, error) {
 }
 
 func (s *Session) UploadPhoto(imgPath string, caption string) error {
-	resp, err := s.insta.UploadPhoto(imgPath, caption, s.insta.NewUploadID(), 100, 0)
+	resp, err := s.insta.UploadPhoto(imgPath, caption, s.insta.NewUploadID(), 87, 0)
 	if err != nil {
 		return err
 	}
