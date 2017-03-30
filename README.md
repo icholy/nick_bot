@@ -145,6 +145,10 @@ CREATE TABLE media (
 
 * http://docs.opencv.org/2.4/modules/objdetect/doc/cascade_classification.html
 
+### Captions
+
+Captions are randomly selected from the `captions.txt` file.
+
 ## Demo
 
 ![](https://raw.githubusercontent.com/icholy/nick_bot/master/demo.gif)
