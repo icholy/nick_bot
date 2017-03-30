@@ -23,7 +23,7 @@ $ go build
 
 ## Usage
 
-``` sh
+``` txt
 Usage of ./nick_bot:
   -autofollow
     	auto follow random people
@@ -67,9 +67,15 @@ Usage of ./nick_bot:
     	instagram username
 ```
 
+## Example Usage
+
+``` sh
+$ ./nick_bot -autofollow=true -minfaces=3 -upload=true -username=<username> -password=<password>
+```
+
 ## Design
 
-### Posting Schedule:
+### Posting Schedule
 
 > The bot posts at [peak engagement times](http://www.huffingtonpost.com/2015/02/25/get-instagram-likes_n_6751614.html)
 
