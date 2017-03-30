@@ -6,6 +6,7 @@
 
 ## Dependencies
 
+* Golang - https://golang.org/
 * OpenCV Developer package.
 
 ``` sh
