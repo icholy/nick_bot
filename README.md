@@ -1,5 +1,7 @@
 # Nick Bot
 
+> Adding some much needed nick to your Instagram photos.
+
 ![](https://camo.githubusercontent.com/618e7a8fdb4d8b6b9bff3b9d2d70852bf40d6055/687474703a2f2f692e696d6775722e636f6d2f42646a6366734a2e676966)
 
 ## Dependencies
@@ -10,7 +12,7 @@
 $ sudo apt install libopencv-dev
 ```
 
-## Built It
+## Build
 
 ``` sh
 $ git clone https://github.com/icholy/nick_bot.git
@@ -18,7 +20,6 @@ $ cd nick_bot
 $ go get -d -v .
 $ go build
 ```
-
 
 ## Usage
 
@@ -65,10 +66,6 @@ Usage of ./nick_bot:
   -username string
     	instagram username
 ```
-
-## Demo
-
-![](https://raw.githubusercontent.com/icholy/nick_bot/master/demo.gif)
 
 ## Design
 
@@ -141,6 +138,10 @@ CREATE TABLE media (
 > Uses a Haar Feature-based Cascade Classifier for Object Detection.
 
 * http://docs.opencv.org/2.4/modules/objdetect/doc/cascade_classification.html
+
+## Demo
+
+![](https://raw.githubusercontent.com/icholy/nick_bot/master/demo.gif)
 
 ## Relevant Instagram TOS
 
