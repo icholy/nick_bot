@@ -176,7 +176,7 @@ func (b *Bot) postRecord(rec *model.Record) error {
 	return nil
 }
 
-func (b *Bot) followRandom(s *instagram.Session, userID string) error {
+func (b *Bot) followRandom(s *instagram.Session, userID int64) error {
 	users, err := s.GetFollowers(userID)
 	if err != nil {
 		return err

@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	ID   string
+	ID   int64
 	Name string
 }
 
@@ -23,7 +23,7 @@ type UserDetails struct {
 type Media struct {
 	ID        string
 	URL       string
-	UserID    string
+	UserID    int64
 	Username  string
 	LikeCount int
 	PostedAt  time.Time

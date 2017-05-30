@@ -42,7 +42,7 @@ func (Session) getLargestCandidate(candidates []response.ImageCandidate) respons
 }
 
 func (s *Session) GetRecentUserMedias(u *model.User) ([]*model.Media, error) {
-	resp, err := s.insta.FirstUserFeed(u.ID)
+	resp, err := s.insta.LatestUserFeed(u.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func (s *Session) GetRecentUserMedias(u *model.User) ([]*model.Media, error) {
 }
 
 func (s *Session) GetUsers() ([]*model.User, error) {
-	id := s.insta.LoggedInUser.StringID()
+	id := s.insta.LoggedInUser.ID
 	resp, err := s.insta.UserFollowing(id, "")
 	if err != nil {
 		return nil, err
@@ -88,14 +88,14 @@ func (s *Session) GetUsers() ([]*model.User, error) {
 	var users []*model.User
 	for _, u := range resp.Users {
 		users = append(users, &model.User{
-			ID:   u.StringID(),
+			ID:   u.ID,
 			Name: u.Username,
 		})
 	}
 	return users, nil
 }
 
-func (s *Session) GetFollowers(userID string) ([]*model.User, error) {
+func (s *Session) GetFollowers(userID int64) ([]*model.User, error) {
 	resp, err := s.insta.UserFollowers(userID, "")
 	if err != nil {
 		return nil, err
@@ -106,14 +106,14 @@ func (s *Session) GetFollowers(userID string) ([]*model.User, error) {
 	var users []*model.User
 	for _, u := range resp.Users {
 		users = append(users, &model.User{
-			ID:   u.StringID(),
+			ID:   u.ID,
 			Name: u.Username,
 		})
 	}
 	return users, nil
 }
 
-func (s *Session) Follow(userID string) error {
+func (s *Session) Follow(userID int64) error {
 	resp, err := s.insta.Follow(userID)
 	if err != nil {
 		return err
@@ -124,8 +124,8 @@ func (s *Session) Follow(userID string) error {
 	return nil
 }
 
-func (s *Session) GetUserDetails(userID string) (*model.UserDetails, error) {
-	resp, err := s.insta.GetUserID(userID)
+func (s *Session) GetUserDetails(userID int64) (*model.UserDetails, error) {
+	resp, err := s.insta.GetUserByID(userID)
 	if err != nil {
 		return nil, err
 	}
