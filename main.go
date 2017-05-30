@@ -26,13 +26,13 @@ import (
 var (
 	username   = flag.String("username", "", "instagram username")
 	password   = flag.String("password", "", "instagram password")
-	minfaces   = flag.Int("minfaces", 1, "minimum faces")
+	minfaces   = flag.Int("min.faces", 1, "minimum faces")
 	upload     = flag.Bool("upload", false, "enable photo uploading")
 	testimg    = flag.String("test.image", "", "test image")
 	testdir    = flag.String("test.dir", "", "test a directory of images")
 	facedir    = flag.String("face.dir", "faces", "directory to load faces from")
 	httpport   = flag.String("http.port", "", "http port (example :8080)")
-	autofollow = flag.Bool("autofollow", false, "auto follow random people")
+	autofollow = flag.Bool("auto.follow", false, "auto follow random people")
 	sentryDSN  = flag.String("sentry.dsn", "", "Sentry DSN")
 
 	resetStore = flag.Bool("reset.store", false, "mark all store records as available")
