@@ -41,7 +41,7 @@ func (s *Store) initDatabase() error {
 		CREATE TABLE IF NOT EXISTS media (
 			media_id    TEXT,
 			media_url   TEXT,
-			user_id     TEXT,
+			user_id     INTEGER,
 			user_name   TEXT,
 			like_count  INTEGER,
 			face_count  INTEGER,
