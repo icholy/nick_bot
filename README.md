@@ -26,7 +26,7 @@ $ go build
 
 ``` txt
 Usage of ./nick_bot:
-  -autofollow
+  -auto.follow
     	auto follow random people
   -draw.face
     	Draw the face (default true)
@@ -44,7 +44,7 @@ Usage of ./nick_bot:
     	The face rectangle margin (default 60)
   -min.neighboor int
     	the lower this number is, the more faces will be found (default 9)
-  -minfaces int
+  -min.faces int
     	minimum faces (default 1)
   -password string
     	instagram password
