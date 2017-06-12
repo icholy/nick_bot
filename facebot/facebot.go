@@ -33,14 +33,14 @@ type Bot struct {
 	captionIndex int
 }
 
-func New(o *Options) (*Bot, error) {
+func New(o *Options) *Bot {
 	if o.MinFaces < 1 {
 		o.MinFaces = 1
 	}
 	return &Bot{
 		opt:   o,
 		store: o.Store,
-	}, nil
+	}
 }
 
 func (b *Bot) getCaption(rec *model.Record) string {

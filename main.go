@@ -106,7 +106,7 @@ func startBot(store *imgstore.Store) error {
 	}
 	shuffle(captions)
 
-	bot, err := facebot.New(&facebot.Options{
+	bot := facebot.New(&facebot.Options{
 		Username:   *username,
 		Password:   *password,
 		MinFaces:   *minfaces,
@@ -115,9 +115,6 @@ func startBot(store *imgstore.Store) error {
 		Captions:   captions,
 		Store:      store,
 	})
-	if err != nil {
-		return err
-	}
 	go bot.Run()
 
 	if *httpport != "" {
