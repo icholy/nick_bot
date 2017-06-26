@@ -167,3 +167,7 @@ Captions are randomly selected from the `captions.txt` file.
 * Respect other members of the Instagram community.
 
 > We remove [...] content that targets private individuals to degrade or shame them, personal information meant to blackmail or harass someone, and repeated unwanted messages.
+
+## Credit:
+
+Idea and code was taken from https://github.com/zikes/chrisify
