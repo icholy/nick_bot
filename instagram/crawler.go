@@ -9,6 +9,10 @@ import (
 	"github.com/icholy/nick_bot/model"
 )
 
+func init() {
+	rand.Seed(time.Now().Unix())
+}
+
 type Crawler struct {
 	username string
 	password string
